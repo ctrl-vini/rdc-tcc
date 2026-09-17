@@ -1,0 +1,35 @@
+% Approval sheet (folha de aprovação). The version sent to the library must
+% not contain signatures.
+
+\begin{folhadeaprovacao}
+
+  \begin{center}
+    \MakeTextUppercase{\imprimirautor}
+
+    \vspace*{2\onelineskip}
+
+    \MakeTextUppercase{\imprimirtitulo}
+  \end{center}
+
+  \vspace*{\onelineskip}
+
+  \hfill
+  \begin{minipage}{.5\textwidth}
+    \imprimirpreambulo
+  \end{minipage}
+
+  \vspace*{2\onelineskip}
+
+  \noindent Aprovado (a) em: \rule{1cm}{0.4pt} / \rule{1cm}{0.4pt} / \rule{1.5cm}{0.4pt}.
+
+  \vspace*{2\onelineskip}
+
+  \begin{center}
+    BANCA EXAMINADORA
+  \end{center}
+
+  \assinatura{\boardmemberone \\ \boardmemberoneinstitution}
+  \assinatura{\boardmembertwo \\ \boardmembertwoinstitution}
+  \assinatura{\boardmemberthree \\ \boardmemberthreeinstitution}
+
+\end{folhadeaprovacao}

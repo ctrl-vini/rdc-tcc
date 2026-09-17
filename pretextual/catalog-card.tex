@@ -1,0 +1,20 @@
+% Catalog card (ficha catalográfica). Generate it with the IFCE online tool
+% (http://fichacatalografica.ifce.edu.br/index.php) and save the PDF as
+% pretextual/catalog-card.pdf. While that file is missing, a placeholder
+% page like the one in the template is printed instead.
+
+\IfFileExists{pretextual/catalog-card.pdf}{%
+  \includepdf[pages=1]{pretextual/catalog-card.pdf}%
+}{%
+  \begin{fichacatalografica}
+    \vspace*{\fill}
+    \noindent\rule{\textwidth}{0.4pt}
+    \begin{center}
+      Página reservada para a ficha catalográfica, que você pode elaborar por meio do
+      \href{http://fichacatalografica.ifce.edu.br/index.php}{Gerador de Ficha Catalográfica}
+      \textit{on-line} do IFCE.
+    \end{center}
+    \noindent\rule{\textwidth}{0.4pt}
+  \end{fichacatalografica}
+  \clearpage
+}

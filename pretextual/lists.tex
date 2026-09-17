@@ -1,0 +1,27 @@
+% Lists and table of contents, in the order required by NBR 14724.
+% Remove a list when the document has no element of that type.
+
+\pdfbookmark[0]{\listfigurename}{lof}
+\listoffigures*
+\cleardoublepage
+
+\pdfbookmark[0]{\listofquadrosname}{loq}
+\listofquadros*
+\cleardoublepage
+
+\pdfbookmark[0]{\listtablename}{lot}
+\listoftables*
+\cleardoublepage
+
+% Acronyms in alphabetical order; foreign expansions in italics.
+\begin{siglas}
+  \item[API] \textit{Application Programming Interface}
+  \item[IDE] \textit{Integrated Development Environment}
+  \item[IFCE] Instituto Federal de Educação, Ciência e Tecnologia do Ceará
+  \item[LLM] \textit{Large Language Model}
+  \item[REST] \textit{Representational State Transfer}
+\end{siglas}
+
+\pdfbookmark[0]{\contentsname}{toc}
+\tableofcontents*
+\cleardoublepage

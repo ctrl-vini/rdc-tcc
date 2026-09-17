@@ -1,0 +1,38 @@
+% Introduction: context, problem, proposal, objectives and document structure.
+% Based on the text and objectives sent to the advisor.
+
+\chapter{Introdução}
+\label{chap:introduction}
+
+Disciplinas práticas das áreas de tecnologia e engenharia dependem de kits e plantas didáticas para aproximar teoria e prática, mas as soluções comerciais costumam ser caras e pouco flexíveis. Por isso, diversos trabalhos propõem alternativas de baixo custo para o ensino, como sistemas de aquisição e controle baseados em ESP32 \cite{duarte2024}, simuladores de sistemas dinâmicos em tempo real usados como plantas didáticas programáveis \cite{souza2014} e a placa aberta BitDogLab \cite{fruett2024}. Mesmo com o \textit{hardware} acessível, porém, programar essas placas ainda representa uma barreira para estudantes iniciantes.
+
+No trabalho da BitDogLab, essa barreira é enfrentada com um modelo de linguagem de grande porte (LLM, do inglês \textit{Large Language Model}), o ChatGPT, que recebe uma descrição textual do \textit{hardware}, indicando quais componentes estão ligados a quais pinos, e, a partir dela, gera e corrige códigos para a placa \cite{fruett2024}. Essa abordagem, no entanto, depende de um serviço comercial em nuvem e de acesso à internet, envia as interações dos estudantes a terceiros e envolve etapas manuais, como carregar a descrição do \textit{hardware} no \textit{chat} e copiar o código gerado para o ambiente de desenvolvimento integrado (IDE, do inglês \textit{Integrated Development Environment}).
+
+Diante desse cenário, este trabalho propõe uma plataforma que oferece essa assistência de forma local. A solução é composta por três partes: uma interface \textit{web}, na qual o estudante escolhe a placa e descreve em linguagem natural o que deseja que ela faça; uma interface de programação de aplicações (API, do inglês \textit{Application Programming Interface}) no estilo REST (do inglês \textit{Representational State Transfer}), que armazena os perfis de \textit{hardware} das placas, insere automaticamente essa descrição em cada requisição e mantém o histórico das conversas; e um LLM aberto executado em um servidor da rede local, por meio de uma ferramenta como o Ollama. Assim, a plataforma funciona sem acesso à internet, sem custos com serviços externos e sem que os dados saiam da instituição.
+
+O \textit{hardware} é tratado apenas como alvo de validação, sem detalhamento do projeto eletrônico. Para avaliar a plataforma, utiliza-se um conjunto de atividades práticas de complexidade crescente, cujos códigos são gerados pela plataforma, gravados na placa por meio de uma IDE e executados, medindo-se a proporção de códigos que funcionam corretamente e o tempo de resposta do modelo no servidor local.
+
+\section{Objetivos}
+\label{sec:objectives}
+
+\subsection{Objetivo geral}
+\label{subsec:general-objective}
+
+Desenvolver uma plataforma \textit{web} integrada a um LLM executado localmente, para auxiliar estudantes na programação de placas didáticas de sistemas embarcados sem depender de serviços em nuvem.
+
+\subsection{Objetivos específicos}
+\label{subsec:specific-objectives}
+
+Para alcançar o objetivo geral, foram definidos os seguintes objetivos específicos:
+
+\begin{alineas}
+  \item definir os requisitos e a arquitetura da plataforma, incluindo o formato da descrição de \textit{hardware} utilizada como contexto pelo modelo;
+  \item implementar uma API REST que integre um LLM aberto, executado em servidor na rede local, e insira automaticamente a descrição da placa nas requisições;
+  \item construir uma interface \textit{web} em que o estudante descreva a atividade em linguagem natural e receba o código gerado com explicações;
+  \item avaliar a plataforma em um conjunto de atividades práticas executadas na placa, quanto à taxa de códigos funcionais e ao tempo de resposta.
+\end{alineas}
+
+\section{Organização do trabalho}
+\label{sec:document-structure}
+
+Este trabalho está organizado em cinco capítulos. Após esta introdução, o \autoref{chap:theory} apresenta a fundamentação teórica sobre sistemas embarcados no ensino, modelos de linguagem de grande porte e aplicações \textit{web}. O \autoref{chap:methodology} descreve a metodologia adotada para cada objetivo específico, e o \autoref{chap:results} apresenta e discute os resultados obtidos. Por fim, o \autoref{chap:conclusion} reúne as conclusões e as sugestões de trabalhos futuros.

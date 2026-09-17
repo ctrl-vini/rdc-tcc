@@ -1,0 +1,36 @@
+% Document data printed on the cover, title page and approval sheet.
+% Replace every value in brackets. Confirm the official course name and
+% degree title with the course coordination.
+
+\titulo{Plataforma web com LLM local para apoio à programação de sistemas embarcados didáticos}
+\autor{José Vinícius Alves de Oliveira}
+\local{Jaguaribe}
+\data{2026}
+
+\orientador{Prof. Dr. Herleson Paiva Pontes}
+
+\newcommand{\institutionname}{Instituto Federal de Educação, Ciência e Tecnologia do Ceará}
+\newcommand{\campusname}{Jaguaribe}
+\newcommand{\coursename}{Tecnologia em Redes de Computadores}
+\newcommand{\degreename}{Tecnólogo em Redes de Computadores}
+\newcommand{\concentrationarea}{Ciência da Computação}
+
+% Nature of the work, as written in the template
+\preambulo{Monografia apresentada ao curso de \coursename{} do \institutionname{} (IFCE) -- \textit{Campus} \campusname, como requisito parcial para obtenção do Título de \degreename. Área de concentração: \concentrationarea.}
+
+% Examination board: name (role) and institution of each member
+\newcommand{\boardmemberone}{Prof. Dr. Herleson Paiva Pontes (Orientador)}
+\newcommand{\boardmemberoneinstitution}{\institutionname{} (IFCE) -- \textit{Campus} \campusname}
+\newcommand{\boardmembertwo}{Prof. [Titulação] [Nome do avaliador]}
+\newcommand{\boardmembertwoinstitution}{[Instituição do avaliador]}
+\newcommand{\boardmemberthree}{Prof. [Titulação] [Nome do avaliador]}
+\newcommand{\boardmemberthreeinstitution}{[Instituição do avaliador]}
+
+% PDF properties
+\AtBeginDocument{%
+  \hypersetup{
+    pdftitle={\imprimirtitulo},
+    pdfauthor={\imprimirautor},
+    pdfsubject={Trabalho de conclusão de curso}
+  }%
+}

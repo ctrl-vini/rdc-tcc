@@ -1,0 +1,61 @@
+% Undergraduate thesis (TCC) following the IFCE academic work template.
+% Compiler: pdfLaTeX (Overleaf default). Bibliography: BibTeX via abntex2cite.
+
+\documentclass[
+  12pt,                    % body text size required by the template
+  openany,                 % chapters can start on any page (PDF delivery)
+  oneside,                 % single-sided layout
+  a4paper,
+  chapter=TITLE,           % primary section titles in uppercase
+  sumario=abnt-6027-2012,  % table of contents layout from NBR 6027
+  english,                 % secondary language (abstract)
+  brazil                   % main language (must be the last language option)
+]{abntex2}
+
+\input{config/packages}
+\input{config/ifce-style}
+\input{config/commands}
+\input{config/metadata}
+
+\begin{document}
+
+\selectlanguage{brazil}
+\frenchspacing
+
+% ---------------------------------------------------------------------------
+% Pre-textual elements
+% ---------------------------------------------------------------------------
+\imprimircapa
+% The environment is used directly: abnTeX2's \imprimirfolhaderosto
+% swallows the token that follows it.
+\begin{folhaderosto*}
+  \folhaderostocontent
+\end{folhaderosto*}
+\input{pretextual/catalog-card}
+\input{pretextual/approval-sheet}
+% \input{pretextual/dedication}       % optional element
+% \input{pretextual/acknowledgments}  % optional element
+% \input{pretextual/epigraph}         % optional element
+\input{pretextual/abstract-pt}
+\input{pretextual/abstract-en}P
+\input{pretextual/lists}
+
+% ---------------------------------------------------------------------------
+% Textual elements
+% ---------------------------------------------------------------------------
+\textual
+\input{chapters/01-introduction}
+\input{chapters/02-theoretical-background}
+\input{chapters/03-methodology}
+\input{chapters/04-results}
+\input{chapters/05-conclusion}
+
+% ---------------------------------------------------------------------------
+% Post-textual elements
+% ---------------------------------------------------------------------------
+\postextual
+\bibliography{references}
+\input{postextual/appendices}
+% \input{postextual/annexes}          % optional element
+
+\end{document}

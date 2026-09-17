@@ -1,0 +1,195 @@
+% Layout rules from the IFCE academic work template ("Trabalho Acadêmico").
+% This file only holds formatting; document data lives in config/metadata.tex.
+
+\makeatletter
+
+% ---------------------------------------------------------------------------
+% Element names used by the template
+% ---------------------------------------------------------------------------
+\addto\captionsbrazil{%
+  \renewcommand{\listfigurename}{Lista de figuras}%
+  \renewcommand{\listtablename}{Lista de tabelas}%
+  \renewcommand{\contentsname}{Sumário}%
+  \renewcommand{\bibname}{Referências}%
+}
+\renewcommand{\listadesiglasname}{Lista de siglas}
+\renewcommand{\orientadorname}{Orientador:}
+\renewcommand{\coorientadorname}{Coorientador:}
+
+% ---------------------------------------------------------------------------
+% Paragraphs: first-line indent, no extra space between paragraphs
+% ---------------------------------------------------------------------------
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0pt}
+
+% ---------------------------------------------------------------------------
+% Titles: 12 pt with the hierarchy shown in the template
+%   1 PRIMARY (bold, uppercase)   1.1 Secondary (bold)
+%   1.1.1 Tertiary (bold italic)  1.1.1.1 Quaternary (italic)
+%   1.1.1.1.1 Quinary (regular)
+% ---------------------------------------------------------------------------
+\renewcommand{\ABNTEXchapterfont}{\normalfont\bfseries}
+\renewcommand{\ABNTEXchapterfontsize}{\normalsize}
+\renewcommand{\ABNTEXpartfont}{\normalfont\bfseries}
+\renewcommand{\ABNTEXpartfontsize}{\normalsize}
+\renewcommand{\ABNTEXsectionfont}{\normalfont\bfseries}
+\renewcommand{\ABNTEXsectionfontsize}{\normalsize}
+\renewcommand{\ABNTEXsubsectionfont}{\normalfont\bfseries\itshape}
+\renewcommand{\ABNTEXsubsectionfontsize}{\normalsize}
+\renewcommand{\ABNTEXsubsubsectionfont}{\normalfont\itshape}
+\renewcommand{\ABNTEXsubsubsectionfontsize}{\normalsize}
+\renewcommand{\ABNTEXsubsubsubsectionfont}{\normalfont}
+\renewcommand{\ABNTEXsubsubsubsectionfontsize}{\normalsize}
+
+% A single space between the section number and its title
+\setsecnumformat{\csname the#1\endcsname\space}
+
+% Chapter number: "1 TÍTULO" and "APÊNDICE A — TÍTULO" with single spaces
+% (abnTeX2's version inserts stray spaces around the number).
+\renewcommand{\printchapternum}{%
+  \tocprintchapter
+  \setboolean{abntex@innonumchapter}{false}%
+  \chapnumfont
+  \ifthenelse{\boolean{abntex@apendiceousecao}}{%
+    \space\thechapter
+    \tocinnonumchapter
+    \ABNTEXcaptiondelim
+  }{%
+    % The leading space is dropped when typeset but still counted when
+    % abnTeX2 sizes the title box, which keeps the title on the number line.
+    \space\thechapter\space
+  }%
+}
+
+% One blank line (1.5 spacing) before and after titles
+\setlength{\afterchapskip}{\onelineskip}
+\setbeforesecskip{\onelineskip}
+\setaftersecskip{\onelineskip}
+\setbeforesubsecskip{\onelineskip}
+\setaftersubsecskip{\onelineskip}
+\setbeforesubsubsecskip{\onelineskip}
+\setaftersubsubsecskip{\onelineskip}
+\setbeforeparaskip{\onelineskip}
+\setafterparaskip{\onelineskip}
+
+% ---------------------------------------------------------------------------
+% Page numbers: top right corner, 10 pt, from the introduction onwards
+% ---------------------------------------------------------------------------
+\makeoddhead{abntheadings}{}{}{\ABNTEXfontereduzida\thepage}
+\makeevenhead{abntheadings}{\ABNTEXfontereduzida\thepage}{}{}
+\makeheadrule{abntheadings}{\textwidth}{0pt}
+
+% ---------------------------------------------------------------------------
+% Captions: above the element, centered, 10 pt, "Figura 1 — Título"
+% The source (\fonte) goes below the element with the same style.
+% ---------------------------------------------------------------------------
+\renewcommand{\ABNTEXcaptiondelim}{~\textemdash~}
+\normalcaption
+\captionstyle{\centering}
+\captionnamefont{\ABNTEXfontereduzida}
+\captiontitlefont{\ABNTEXfontereduzida}
+
+% Floats placed on a page of their own start at the top of that page
+\setlength{\@fptop}{0pt}
+
+% "Quadro" float for textual information displayed in a grid
+\newcommand{\quadroname}{Quadro}
+\newcommand{\listofquadrosname}{Lista de quadros}
+\newcommand{\quadroautorefname}{Quadro}
+\newfloat[chapter]{quadro}{loq}{\quadroname}
+\newlistof{listofquadros}{loq}{\listofquadrosname}
+\newlistentry{quadro}{loq}{0}
+\counterwithout{quadro}{chapter}
+\renewcommand{\thequadro}{\arabic{quadro}}
+
+% ---------------------------------------------------------------------------
+% Lists of illustrations and tables: "Figura 1 — Título ..... 15"
+% ---------------------------------------------------------------------------
+\renewcommand{\cftfigurename}{\figurename\space}
+\renewcommand*{\cftfigureaftersnum}{\hfill\textemdash\hfill}
+\renewcommand{\cfttablename}{\tablename\space}
+\renewcommand*{\cfttableaftersnum}{\hfill\textemdash\hfill}
+\renewcommand{\cftquadroname}{\quadroname\space}
+\renewcommand*{\cftquadroaftersnum}{\hfill\textemdash\hfill}
+\cftsetindents{figure}{0em}{5.5em}
+\cftsetindents{table}{0em}{5.5em}
+\cftsetindents{quadro}{0em}{5.5em}
+
+% ---------------------------------------------------------------------------
+% Table of contents: same typographic hierarchy as the titles
+% ---------------------------------------------------------------------------
+\setlength{\cftbeforechapterskip}{0pt}
+\renewcommand{\cftchapterfont}{\bfseries}
+\renewcommand{\cftchapterpagefont}{\normalfont}
+\renewcommand{\cftchapterleader}{\normalfont\cftdotfill{\cftchapterdotsep}}
+\renewcommand{\cftsectionfont}{\bfseries}
+\renewcommand{\cftsectionpagefont}{\normalfont}
+\renewcommand{\cftsectionleader}{\normalfont\cftdotfill{\cftsectiondotsep}}
+\renewcommand{\cftsubsectionfont}{\bfseries\itshape}
+\renewcommand{\cftsubsectionpagefont}{\normalfont}
+\renewcommand{\cftsubsectionleader}{\normalfont\cftdotfill{\cftsubsectiondotsep}}
+\renewcommand{\cftsubsubsectionfont}{\itshape}
+\renewcommand{\cftsubsubsectionpagefont}{\normalfont}
+\renewcommand{\cftsubsubsectionleader}{\normalfont\cftdotfill{\cftsubsubsectiondotsep}}
+\renewcommand{\cftparagraphfont}{\normalfont}
+\renewcommand{\cftparagraphpagefont}{\normalfont}
+% Appendix and annex entries: "APÊNDICE A — TÍTULO"
+\cftinsertcode{A}{\renewcommand{\cftchapteraftersnum}{\space\textemdash\space}}
+
+% ---------------------------------------------------------------------------
+% Cover (capa)
+% ---------------------------------------------------------------------------
+\renewcommand{\imprimircapa}{%
+  \begin{capa}%
+    \centering
+    \bfseries
+    \MakeTextUppercase{\institutionname}\par
+    IFCE \textit{CAMPUS} \MakeTextUppercase{\campusname}\par
+    \MakeTextUppercase{\coursename}\par
+    \vspace*{\fill}
+    \MakeTextUppercase{\imprimirautor}\par
+    \vspace*{\fill}
+    \MakeTextUppercase{\imprimirtitulo}\par
+    \vspace*{\fill}\vspace*{\fill}
+    \MakeTextUppercase{\imprimirlocal}\par
+    \imprimirdata\par
+  \end{capa}%
+}
+
+% ---------------------------------------------------------------------------
+% Title page (folha de rosto)
+% ---------------------------------------------------------------------------
+\renewcommand{\folhaderostocontent}{%
+  \begin{center}
+    \MakeTextUppercase{\imprimirautor}
+  \end{center}
+  \vspace*{\fill}
+  \begin{center}
+    \MakeTextUppercase{\imprimirtitulo}
+  \end{center}
+  \vspace*{\fill}
+  \hfill
+  \begin{minipage}{.5\textwidth}
+    \SingleSpacing
+    \imprimirpreambulo\par
+    \vspace{\onelineskip}
+    {\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
+      \imprimirorientadorRotulo~\imprimirorientador.\par
+      \abntex@ifnotempty{\imprimircoorientador}{%
+        \vspace{\onelineskip}
+        \imprimircoorientadorRotulo~\imprimircoorientador.\par}}
+  \end{minipage}
+  \vspace*{\fill}
+  \begin{center}
+    \MakeTextUppercase{\imprimirlocal}\par
+    \imprimirdata
+  \end{center}
+}
+
+% ---------------------------------------------------------------------------
+% Approval sheet signatures
+% ---------------------------------------------------------------------------
+\setlength{\ABNTEXsignwidth}{12cm}
+\setlength{\ABNTEXsignskip}{1.2cm}
+
+\makeatother

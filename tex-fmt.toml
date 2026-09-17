@@ -1,0 +1,10 @@
+# tex-fmt settings for this project (used by LaTeX Workshop)
+
+# Keep one paragraph per line instead of hard-wrapping at 80 columns.
+wrap = false
+
+# abnTeX2 list environments, indented like itemize.
+lists = ["alineas", "subalineas", "incisos", "siglas", "simbolos"]
+
+# Chapters inside appendix and annex environments stay unindented.
+no-indent-envs = ["apendicesenv", "anexosenv"]

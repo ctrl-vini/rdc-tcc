@@ -1,0 +1,36 @@
+% Package loading and package-level settings only.
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% Times font (the template accepts Times New Roman or Arial).
+\usepackage{mathptmx}
+% For an Arial-like font, replace the line above with:
+% \usepackage[scaled]{helvet}
+% \renewcommand{\familydefault}{\sfdefault}
+
+\usepackage{microtype}      % better justification
+\usepackage{indentfirst}    % indent the first paragraph after titles
+\usepackage{graphicx}
+\graphicspath{{figures/}}   % image files go in the figures/ folder
+\usepackage{xcolor}
+\usepackage{booktabs}       % horizontal rules for tables
+\usepackage{tabularx}       % tables with flexible column widths
+\usepackage{pdfpages}       % inserts the catalog card PDF
+\usepackage{tikz}
+\usetikzlibrary{positioning, fit, arrows.meta}
+
+% Author-date citations (ABNT).
+\usepackage[alf]{abntex2cite}
+% Style options stored in the "ifce-options" entry of references.bib:
+% NBR 10520:2023 citations (Author, year), bold titles and all authors listed.
+\AtBeginDocument{\citeoption{ifce-options}}
+
+% NBR 6023:2018 no longer wraps URLs in angle brackets.
+\def\UrlLeft{}
+\def\UrlRight{}
+
+\hypersetup{
+  hidelinks,
+  bookmarksdepth=4
+}

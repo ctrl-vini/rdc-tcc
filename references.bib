@@ -1,0 +1,85 @@
+Bibliography database (BibTeX with abntex2cite).
+
+Writing rules for new entries:
+- accented letters in author and organization names use LaTeX commands, for
+  example Guimar{\~a}es, so BibTeX can convert them to uppercase;
+- titles in sentence case; protect acronyms and proper names with braces;
+- page ranges with a single hyphen (462-471), as in the template;
+- events follow NBR 6023:2018: organization holds the event name and
+  conference-number, conference-year and conference-location complete it.
+
+Only cited entries appear in the reference list.
+
+Style options read by abntex2-alf.bst (loaded in config/packages.tex).
+
+@abnt-options{ifce-options,
+  abnt-cite-style = "(Author, YEAR)",
+  abnt-emphasize  = "\textbf",
+  abnt-etal-list  = 0,
+  key             = "aaaa"
+}
+
+@article{fruett2024,
+  author  = {Fruett, Fabiano and Barbosa, Fernanda Pereira and Fraga, Samuel Cardoso Zampolli and Guimar{\~a}es, Pedro Ivo Arag{\~a}o},
+  title   = {Empowering {STEAM} activities with artificial intelligence and open hardware},
+  subtitle = {the {BitDogLab}},
+  journal = {IEEE Transactions on Education},
+  volume  = {67},
+  number  = {3},
+  pages   = {462-471},
+  month   = jun,
+  year    = {2024},
+  note    = {DOI: 10.1109/TE.2024.3377555}
+}
+
+@inproceedings{duarte2024,
+  author       = {Duarte, Gabriel M. and Junior, Kleber R. S. and Oliveira, Lucas S. and Leite, Valter J. S.},
+  title        = {Sistema embarcado para aplicações em disciplinas experimentais},
+  organization = {Congresso Brasileiro de Autom{\'a}tica},
+  conference-number   = {25},
+  conference-year     = {2024},
+  conference-location = {Rio de Janeiro},
+  booktitle    = {Anais {\normalfont[...]}},
+  address      = {Rio de Janeiro},
+  publisher    = {SBA},
+  year         = {2024},
+  note         = {DOI: 10.20906/CBA2024/4231}
+}
+
+@inproceedings{souza2014,
+  author       = {de Souza, Isaac D. T. and Silva, S{\'e}rgio Natan and Teles, Rafael and Fernandes, Marcelo A. C.},
+  title        = {Plataforma de simulação em tempo real para sistemas dinâmicos},
+  organization = {Congresso Brasileiro de Autom{\'a}tica},
+  conference-number   = {20},
+  conference-year     = {2014},
+  conference-location = {Belo Horizonte},
+  booktitle    = {Anais {\normalfont[...]}},
+  address      = {Belo Horizonte},
+  publisher    = {SBA},
+  year         = {2014},
+  pages        = {867-874}
+}
+
+@article{souza2016,
+  author  = {de Souza, Isaac D. T. and Silva, S{\'e}rgio N. and Fernandes, Marcelo A. C.},
+  title   = {Plataforma para simulação em tempo real de sistemas dinâmicos e {\textit{hardware-in-the-loop}} em sistemas embarcados do tipo {PSOC}},
+  journal = {Proceeding Series of the Brazilian Society of Computational and Applied Mathematics},
+  volume  = {4},
+  number  = {1},
+  year    = {2016}
+}
+
+@inproceedings{parreira2021,
+  author       = {Parreira, Paulo Felipe Possa and Silva, Taynan Roger and de Novais, Heitor Augusto and Luz, Eduardo Jos{\'e} da Silva and {R{\^e}go Segundo}, Alan Kardek},
+  title        = {Laboratório virtual de sistemas embarcados},
+  subtitle     = {uma abordagem de ensino remoto usando softwares gratuitos},
+  organization = {Simp{\'o}sio Brasileiro de Automa{\c{c}}{\~a}o Inteligente},
+  conference-number   = {15},
+  conference-year     = {2021},
+  conference-location = {On-line},
+  booktitle    = {Anais {\normalfont[...]}},
+  publisher    = {SBA},
+  year         = {2021},
+  pages        = {1405-1412},
+  note         = {DOI: 10.20906/sbai2021/216514}
+}

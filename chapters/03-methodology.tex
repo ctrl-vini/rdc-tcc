@@ -1,0 +1,76 @@
+% Methodology: one section per specific objective, in the same order used in
+% the results chapter.
+
+\chapter{Metodologia}
+\label{chap:methodology}
+
+Este capítulo descreve os procedimentos adotados para alcançar os objetivos específicos definidos na \autoref{sec:objectives}. Cada seção corresponde a um desses objetivos, e a \autoref{fig:architecture} apresenta a visão geral da arquitetura proposta.
+
+\section{Requisitos e arquitetura}
+\label{sec:method-architecture}
+
+\placeholder{Descrever como os requisitos foram levantados e como a arquitetura foi definida.}
+
+\begin{figure}[!htb]
+  \centering
+  \caption{Arquitetura proposta para a plataforma}
+  \label{fig:architecture}
+  \begin{tikzpicture}[
+      node distance=1.3cm and 1.9cm,
+      block/.style={draw, rounded corners=2pt, align=center, text width=3.2cm,
+        minimum height=1.5cm, font=\small},
+      arrow/.style={-{Stealth[length=2.2mm]}, thick},
+      label text/.style={font=\footnotesize, align=center}
+    ]
+    \node[block] (web) {Interface \textit{web}\\(navegador do estudante)};
+    \node[block, right=of web] (api) {API REST\\(perfis de \textit{hardware}, \textit{prompts} e histórico)};
+    \node[block, right=of api] (llm) {LLM aberto\\(Ollama)};
+    \node[block, below=of web] (ide) {IDE};
+    \node[block, right=of ide] (board) {Placa didática};
+
+    \node[draw, dashed, rounded corners=4pt, inner sep=0.3cm, fit=(api)(llm),
+      label={[label text]above:Servidor na rede local}] {};
+
+    \draw[arrow] ([yshift=3mm]web.east) -- node[label text, above] {pedido} ([yshift=3mm]api.west);
+    \draw[arrow] ([yshift=-3mm]api.west) -- node[label text, below] {código} ([yshift=-3mm]web.east);
+    \draw[arrow] ([yshift=3mm]api.east) -- node[label text, above] {\textit{prompt}} ([yshift=3mm]llm.west);
+    \draw[arrow] ([yshift=-3mm]llm.west) -- node[label text, below] {resposta} ([yshift=-3mm]api.east);
+    \draw[arrow] (web) -- node[label text, right] {cópia do código} (ide);
+    \draw[arrow] (ide) -- node[label text, above] {gravação} (board);
+  \end{tikzpicture}
+  \fonte{elaborado pelo autor.}
+\end{figure}
+
+\section{Implementação da API e integração com o LLM}
+\label{sec:method-api}
+
+\placeholder{Descrever as tecnologias da API, o formato dos perfis de \textit{hardware}, a montagem dos \textit{prompts} e a comunicação com o Ollama.}
+
+\section{Desenvolvimento da interface \textit{web}}
+\label{sec:method-web}
+
+\placeholder{Descrever as tecnologias e as telas da interface.}
+
+\section{Procedimento de avaliação}
+\label{sec:method-evaluation}
+
+\placeholder{Descrever o ambiente de testes (servidor, modelo e placa), as atividades do \autoref{qua:activities} e como foram medidos a taxa de códigos funcionais e o tempo de resposta.}
+
+% Example rows: replace them with the activities actually used.
+\begin{quadro}[!htb]
+  \centering
+  \caption{Atividades práticas utilizadas na avaliação}
+  \label{qua:activities}
+  \begin{tabularx}{\textwidth}{|c|X|c|}
+    \hline
+    \textbf{Atividade} & \textbf{Descrição} & \textbf{Complexidade} \\
+    \hline
+    A1 & Acionar um LED e variar sua cor & Baixa \\
+    \hline
+    A2 & Ler botões e acionar um \textit{buzzer} & Média \\
+    \hline
+    A3 & Exibir leituras de sensores em um \textit{display} & Alta \\
+    \hline
+  \end{tabularx}
+  \fonte{elaborado pelo autor.}
+\end{quadro}
