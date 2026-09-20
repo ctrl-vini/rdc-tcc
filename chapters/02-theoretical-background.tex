@@ -4,25 +4,70 @@
 \chapter{Fundamentação teórica}
 \label{chap:theory}
 
-\placeholder{Apresentar, em um parágrafo, os temas abordados neste capítulo.}
+Este capítulo reúne os conceitos necessários para acompanhar a metodologia e os resultados. A \autoref{sec:embedded-education} trata do uso de plataformas embarcadas de baixo custo em atividades práticas de ensino e apresenta a placa adotada como alvo de validação. A \autoref{sec:llm} conceitua os modelos de linguagem de grande porte, seu uso na geração de código e a execução local de modelos abertos. A \autoref{sec:web-rest} descreve a arquitetura cliente-servidor e o estilo REST, que estruturam a comunicação entre as partes da plataforma. Por fim, a \autoref{sec:related-work} compara os trabalhos da base de referências com a proposta.
 
 \section{Sistemas embarcados no ensino}
 \label{sec:embedded-education}
 
-% Suggested sources: duarte2024, souza2014, souza2016, parreira2021, fruett2024.
-\placeholder{Descrever o uso de plataformas embarcadas de baixo custo em atividades práticas de ensino e apresentar brevemente a placa usada como alvo de validação.}
+Sistemas embarcados são sistemas computacionais dedicados a uma função específica dentro de um equipamento maior, construídos em geral sobre microcontroladores que integram processador, memória e periféricos em um único circuito integrado. Em disciplinas práticas das áreas de tecnologia e engenharia, esses sistemas atuam como plantas didáticas: o estudante programa o dispositivo, observa o comportamento físico resultante e relaciona esse comportamento ao conteúdo teórico da disciplina.
+
+A adoção de plataformas de baixo custo nesse papel responde ao preço e à rigidez dos kits comerciais. \citeonline{duarte2024} desenvolvem um sistema embarcado de aquisição e controle baseado em ESP32 para disciplinas experimentais, com custo bastante inferior ao de bancadas didáticas equivalentes. \citeonline{souza2014} propõem uma plataforma de simulação em tempo real que reproduz o comportamento de sistemas dinâmicos em \textit{hardware} embarcado, permitindo que uma única placa represente diferentes plantas; o trabalho é estendido em \citeonline{souza2016} para outras arquiteturas embarcadas, com suporte a simulação do tipo \textit{hardware-in-the-loop}. Em outra direção, \citeonline{parreira2021} montam um laboratório virtual de sistemas embarcados apoiado em \textit{softwares} gratuitos, voltado ao ensino remoto. Mais recentemente, \citeonline{fruett2024} apresentam a BitDogLab, uma placa aberta de baixo custo para atividades educacionais em ciência e tecnologia.
+
+Neste trabalho, o ESP32 é a placa adotada como alvo de validação. Trata-se de um sistema em um \textit{chip} (SoC, do inglês \textit{System on Chip}) de baixo custo desenvolvido pela Espressif Systems, que integra até dois processadores Xtensa LX6 de 32 bits operando em frequência de até 240 MHz, 520 KB de memória de acesso aleatório (RAM, do inglês \textit{Random Access Memory}) interna e conectividade sem fio WiFi 802.11 b/g/n e \textit{Bluetooth} \cite{espressif2026}. O \textit{chip} disponibiliza ainda pinos de entrada e saída de uso geral (GPIO, do inglês \textit{General Purpose Input/Output}) e interfaces de comunicação com periféricos, como SPI, I2C e UART, além de conversores analógico-digitais. Essa combinação de conectividade nativa e preço acessível explica sua presença recorrente em trabalhos de ensino, como o de \citeonline{duarte2024}.
+
+Duas características do ESP32 importam diretamente para a proposta. A primeira é a forma de programação: o código é escrito em C/C++ em uma IDE, como a Arduino IDE ou o PlatformIO, compilado no computador do estudante e gravado na placa por conexão serial. A segunda é a restrição de recursos: a quantidade limitada de memória e a frequência de operação modesta impõem limites ao código, que precisa respeitar o consumo de memória e as particularidades de cada periférico. Essas duas características delimitam o que a plataforma proposta precisa produzir: código-fonte compilável na IDE e coerente com os pinos e os periféricos efetivamente disponíveis na placa, informação fornecida ao modelo por meio do perfil de \textit{hardware} descrito no \autoref{chap:methodology}.
 
 \section{Modelos de linguagem de grande porte}
 \label{sec:llm}
 
-\placeholder{Conceituar LLM, seu uso na geração de código, o papel do contexto nos \textit{prompts} e a execução local de modelos abertos com ferramentas como o Ollama.}
+Um modelo de linguagem de grande porte é uma rede neural treinada para prever o próximo elemento de uma sequência de texto a partir dos elementos anteriores. Esses modelos são construídos sobre a arquitetura \textit{Transformer}, proposta por \citeonline{vaswani2017}, cujo mecanismo de atenção permite que cada elemento da sequência seja processado levando em conta o contexto completo em que aparece. Treinados sobre grandes volumes de texto, modelos com bilhões de parâmetros passam a executar tarefas para as quais não foram explicitamente treinados, a partir apenas da descrição da tarefa no texto de entrada.
+
+A geração de código é uma dessas tarefas. Como o código-fonte de repositórios públicos compõe parte dos dados de treinamento, os modelos aprendem a associar descrições em linguagem natural a trechos de código correspondentes. \citeonline{chen2021} avaliam modelos treinados com código e mostram que eles produzem funções corretas a partir de comentários descritivos, embora a taxa de acerto caia à medida que o problema se torna mais complexo e passa a depender de detalhes não expressos no enunciado.
+
+Essa dependência torna o contexto fornecido ao modelo determinante para a qualidade do resultado. O texto enviado ao modelo, chamado de \textit{prompt}, pode conter, além do pedido do usuário, informações que o modelo não teria como inferir. No caso de placas didáticas, essas informações são a identificação dos componentes conectados e dos pinos correspondentes; sem elas, o modelo tende a gerar código para uma configuração genérica, que não corresponde à placa em uso. \citeonline{fruett2024} exploram essa propriedade ao fornecer ao ChatGPT uma descrição textual do \textit{hardware} da BitDogLab antes de solicitar o código. A estratégia, conhecida como \textit{prompting}, dispensa o ajuste fino do modelo, que exigiria dados rotulados e capacidade computacional muito superior.
+
+Durante algum tempo, empregar um LLM implicava recorrer a serviços comerciais em nuvem, pois apenas eles dispunham da infraestrutura necessária. A publicação de modelos abertos alterou esse quadro. O Llama 3 \cite{grattafiori2024}, desenvolvido pela Meta, é distribuído em versões de diferentes tamanhos, e técnicas de quantização reduzem a precisão numérica dos parâmetros, diminuindo o espaço ocupado em memória e permitindo a execução em computadores comuns, com perda limitada de qualidade. Ferramentas como o Ollama \cite{ollama2026} encapsulam esse processo: obtêm o modelo, gerenciam sua execução e expõem uma API HTTP local, por meio da qual outras aplicações enviam \textit{prompts} e recebem as respostas.
+
+A escolha entre nuvem e execução local altera o compromisso entre as partes envolvidas. O processamento em nuvem oferece acesso a modelos maiores e dispensa investimento em infraestrutura, mas implica custo por uso, dependência de conexão com a internet e envio dos dados do usuário a terceiros. O processamento local mantém os dados na instituição, elimina o custo por requisição e permite o funcionamento em rede isolada, ao preço de exigir um servidor dedicado e de limitar o tamanho do modelo à capacidade desse servidor. Em um laboratório de ensino, no qual as requisições se concentram em poucos horários e o conteúdo é produzido por estudantes, a segunda configuração é a mais adequada, e é a adotada neste trabalho.
 
 \section{Aplicações \textit{web} e APIs REST}
 \label{sec:web-rest}
 
-\placeholder{Explicar a arquitetura cliente-servidor e o estilo arquitetural REST adotado na API.}
+Aplicações \textit{web} seguem a arquitetura cliente-servidor, na qual as responsabilidades são divididas entre dois papéis: o cliente apresenta a interface e envia requisições, e o servidor mantém os dados e a lógica de negócio e devolve as respostas. A separação permite que o cliente seja apenas o navegador do estudante, sem instalação de \textit{software} adicional, e que o processamento fique concentrado em uma máquina da rede local, que pode atender vários clientes simultaneamente.
+
+O estilo arquitetural REST, formulado por \citeonline{fielding2000}, define um conjunto de restrições para sistemas distribuídos sobre a \textit{web}. Entre elas estão a própria separação cliente-servidor, a ausência de estado no servidor, segundo a qual cada requisição carrega toda a informação necessária para ser atendida, e a interface uniforme, que identifica cada recurso por um identificador uniforme de recurso (URI, do inglês \textit{Uniform Resource Identifier}) e o manipula por meio de representações padronizadas.
+
+Na prática, uma API REST sobre o protocolo de transferência de hipertexto (HTTP, do inglês \textit{Hypertext Transfer Protocol}) associa as operações aos métodos do protocolo — GET para leitura, POST para criação, PUT para atualização e DELETE para remoção — e sinaliza o desfecho de cada requisição por códigos de estado. As representações dos recursos trafegam usualmente na notação de objetos JavaScript (JSON, do inglês \textit{JavaScript Object Notation}), formato textual leve, independente de linguagem e nativamente interpretado pelos navegadores.
+
+Na plataforma proposta, esse estilo estrutura duas comunicações distintas. Na primeira, o navegador é cliente da API: envia a placa escolhida e a descrição da atividade e recebe o código gerado. Na segunda, a própria API é cliente do serviço que executa o modelo, ao qual envia por HTTP o \textit{prompt} montado com o perfil de \textit{hardware} e do qual recebe a resposta. As duas comunicações ocorrem inteiramente dentro da rede local da instituição, o que dispensa acesso à internet durante o uso.
 
 \section{Trabalhos relacionados}
 \label{sec:related-work}
 
-\placeholder{Comparar os trabalhos da base de referências com a proposta, evidenciando a lacuna tratada.}
+Os trabalhos apresentados na \autoref{sec:embedded-education} atacam o custo e a rigidez dos recursos didáticos, mas tratam a programação da placa como etapa já dominada pelo estudante. \citeonline{duarte2024}, \citeonline{souza2014} e \citeonline{souza2016} entregam \textit{hardware} de baixo custo e, no segundo caso, a capacidade de simular diferentes plantas, sem oferecer apoio à escrita do código. \citeonline{parreira2021} removem a necessidade do dispositivo físico ao substituí-lo por simulação, o que viabiliza o ensino remoto, mas mantém a mesma barreira de programação e afasta o estudante do comportamento real do \textit{hardware}.
+
+O trabalho de \citeonline{fruett2024} é o mais próximo desta proposta, por ser o único a tratar a barreira de programação diretamente: a descrição textual do \textit{hardware} da BitDogLab é fornecida a um LLM, que gera e corrige os códigos da placa. A solução, porém, apoia-se em um serviço comercial em nuvem, o que impõe dependência de conexão com a internet, custo associado ao serviço e envio das interações dos estudantes a terceiros, além de exigir etapas manuais de carregamento da descrição e de cópia do código gerado.
+
+O \autoref{qua:related-work} resume essa comparação. A lacuna que este trabalho aborda está na última coluna: nenhum dos trabalhos analisados oferece apoio automatizado à programação com o modelo executado na infraestrutura da própria instituição.
+
+\begin{quadro}[!htb]
+  \centering
+  \caption{Comparação entre os trabalhos relacionados e a proposta}
+  \label{qua:related-work}
+  \begin{tabularx}{\textwidth}{|p{3.4cm}|X|>{\centering\arraybackslash}p{2.1cm}|>{\centering\arraybackslash}p{1.9cm}|}
+    \hline
+    \textbf{Trabalho} & \textbf{Recurso didático} & \textbf{Apoio à programação} & \textbf{Depende de nuvem} \\
+    \hline
+    \citeonline{duarte2024} & Sistema embarcado de aquisição e controle em ESP32 & Não & Não \\
+    \hline
+    \citeonline{souza2014} e \citeonline{souza2016} & Simulação de plantas dinâmicas em tempo real & Não & Não \\
+    \hline
+    \citeonline{parreira2021} & Laboratório virtual com \textit{softwares} gratuitos & Não & Não \\
+    \hline
+    \citeonline{fruett2024} & Placa aberta BitDogLab & Sim, via ChatGPT & Sim \\
+    \hline
+    Este trabalho & Placa didática programada pelo estudante & Sim, via LLM local & Não \\
+    \hline
+  \end{tabularx}
+  \fonte{elaborado pelo autor.}
+\end{quadro}
