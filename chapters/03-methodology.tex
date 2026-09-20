@@ -9,7 +9,39 @@ Este capítulo descreve os procedimentos adotados para alcançar os objetivos es
 \section{Requisitos e arquitetura}
 \label{sec:method-architecture}
 
-\placeholder{Descrever como os requisitos foram levantados e como a arquitetura foi definida.}
+Os requisitos da plataforma foram derivados de duas fontes. A primeira é o problema descrito no \autoref{chap:introduction}: o estudante precisa obter código funcional para a placa sem dominar previamente a programação do microcontrolador. A segunda são as limitações identificadas na solução de \citeonline{fruett2024}, discutidas na \autoref{sec:related-work} — dependência de serviço comercial em nuvem, envio das interações a terceiros e etapas manuais de carregamento da descrição do \textit{hardware}. Cada limitação foi convertida em um requisito da plataforma. O \autoref{qua:requirements} apresenta o conjunto resultante.
+
+\begin{quadro}[!htb]
+  \centering
+  \caption{Requisitos funcionais e não funcionais da plataforma}
+  \label{qua:requirements}
+  \begin{tabularx}{\textwidth}{|c|X|}
+    \hline
+    \textbf{Identificador} & \textbf{Descrição} \\
+    \hline
+    RF01 & Permitir que o estudante selecione a placa alvo entre os perfis cadastrados \\
+    \hline
+    RF02 & Permitir que o estudante descreva a atividade desejada em linguagem natural \\
+    \hline
+    RF03 & Montar automaticamente o \textit{prompt}, combinando o perfil de \textit{hardware} da placa selecionada com a descrição da atividade \\
+    \hline
+    RF04 & Submeter o \textit{prompt} ao modelo e devolver o código gerado acompanhado de uma explicação \\
+    \hline
+    RF05 & Manter o histórico da conversa, permitindo que o estudante refine o código a partir do resultado anterior \\
+    \hline
+    RNF01 & Operar integralmente na rede local, sem depender de acesso à internet nem de serviços pagos \\
+    \hline
+    RNF02 & Dispensar instalação de \textit{software} no computador do estudante, além do navegador e da IDE \\
+    \hline
+    RNF03 & Permitir o cadastro de novas placas por edição de arquivo de configuração, sem alteração do código-fonte \\
+    \hline
+  \end{tabularx}
+  \fonte{elaborado pelo autor.}
+\end{quadro}
+
+A arquitetura foi definida a partir desses requisitos e separa a plataforma em três partes, apresentadas na \autoref{fig:architecture}. A interface \textit{web} executa no navegador do estudante e concentra apenas a apresentação, o que atende ao RNF02. A API REST executa em um servidor da rede local e concentra as regras da plataforma: guarda os perfis de \textit{hardware}, monta os \textit{prompts} e mantém o histórico das conversas, atendendo aos requisitos RF01 a RF05. O modelo de linguagem executa no mesmo servidor, por meio do Ollama, e é acessado pela API por HTTP.
+
+Duas consequências dessa separação orientaram o projeto. A primeira é que a montagem do \textit{prompt} fica inteiramente do lado do servidor, de modo que o estudante nunca manipula a descrição do \textit{hardware} — é essa escolha que elimina as etapas manuais apontadas no trabalho de \citeonline{fruett2024}. A segunda é que o modelo é acessado por uma interface bem definida, o que permite trocá-lo sem alterar a interface \textit{web} nem as regras da API, recurso utilizado no procedimento de avaliação descrito na \autoref{sec:method-evaluation}.
 
 \begin{figure}[!htb]
   \centering
@@ -44,19 +76,34 @@ Este capítulo descreve os procedimentos adotados para alcançar os objetivos es
 \section{Implementação da API e integração com o LLM}
 \label{sec:method-api}
 
-\placeholder{Descrever as tecnologias da API, o formato dos perfis de \textit{hardware}, a montagem dos \textit{prompts} e a comunicação com o Ollama.}
+A API foi implementada em Python com o \textit{framework} FastAPI, executado pelo servidor \textit{web} Uvicorn. A escolha considerou o suporte nativo do \textit{framework} à validação de dados e à documentação automática dos recursos, e a existência de uma biblioteca oficial do Ollama para Python, que dispensa a construção manual das requisições ao modelo.
+
+O código foi organizado em camadas, cada uma com uma responsabilidade única. As rotas tratam apenas do protocolo HTTP: recebem a requisição, validam o corpo e devolvem a resposta. Os serviços concentram as regras da plataforma — carregar o perfil da placa, montar o \textit{prompt}, registrar o histórico e acionar o modelo. Os esquemas descrevem os formatos de entrada e saída, e um módulo de configuração centraliza os parâmetros ajustáveis, entre eles o nome do modelo utilizado.
+
+Os perfis de \textit{hardware} são arquivos JSON armazenados em um diretório do servidor, um por placa, carregados na inicialização. Cada perfil declara o identificador e o nome da placa, o microcontrolador, a linguagem e o \textit{framework} de destino do código, a lista de componentes disponíveis com o respectivo pino e tipo, e observações sobre restrições de uso. Cadastrar uma nova placa consiste em acrescentar um arquivo ao diretório, sem alterar o código-fonte, conforme o RNF03. O \autoref{app:hardware-profile} apresenta o perfil utilizado para o ESP32.
+
+A montagem do \textit{prompt} é feita pela API a cada requisição e reúne quatro partes, nesta ordem: uma instrução de sistema, que define o papel do modelo e o formato esperado da resposta — código-fonte seguido de uma explicação curta; o perfil de \textit{hardware} da placa selecionada, serializado como texto; as mensagens anteriores da conversa, quando houver; e a descrição da atividade escrita pelo estudante. O histórico de cada conversa é gravado em arquivo JSON, o que permite o refinamento previsto no RF05 e preserva o registro entre reinicializações do servidor.
+
+A comunicação com o modelo é feita pela biblioteca oficial do Ollama, que encapsula as chamadas HTTP ao serviço em execução no mesmo servidor. O nome do modelo é lido da configuração a cada requisição, e não fixado no código, o que permite repetir a mesma atividade com modelos diferentes sem qualquer alteração na plataforma.
 
 \section{Desenvolvimento da interface \textit{web}}
 \label{sec:method-web}
 
-\placeholder{Descrever as tecnologias e as telas da interface.}
+A interface foi construída com HTML, CSS e JavaScript puros, sem \textit{framework} de \textit{front-end} e sem etapa de compilação. A decisão decorre do RNF02 e do escopo enxuto do trabalho: os arquivos são servidos como conteúdo estático pela própria API, de modo que subir o servidor é a única operação necessária para colocar a plataforma em uso, e o estudante precisa apenas de um navegador.
+
+O código do lado do cliente segue a mesma separação adotada na API. Os módulos de serviço concentram as chamadas à API, os componentes tratam da montagem dos elementos de tela e os utilitários reúnem as funções de formatação. A comunicação usa a interface \textit{fetch} do navegador, com JSON nos dois sentidos.
+
+A interface é composta por uma única tela, organizada em três áreas. Na primeira, o estudante escolhe a placa em uma lista preenchida a partir dos perfis cadastrados. Na segunda, descreve a atividade em um campo de texto livre. Na terceira, recebe a resposta do modelo, com o código exibido em bloco próprio, acompanhado de um botão de cópia e da explicação gerada. As mensagens anteriores permanecem visíveis abaixo, o que permite pedir ajustes sobre o código já produzido sem reescrever a descrição inicial.
 
 \section{Procedimento de avaliação}
 \label{sec:method-evaluation}
 
-\placeholder{Descrever o ambiente de testes (servidor, modelo e placa), as atividades do \autoref{qua:activities} e como foram medidos a taxa de códigos funcionais e o tempo de resposta.}
+A avaliação foi conduzida em ambiente controlado, com o servidor e o computador de testes na mesma rede local. O servidor executa o Ollama e a API; o computador de testes executa o navegador e a IDE, com o ESP32 conectado por USB. O servidor de testes é \placeholder{informar processador, memória RAM e presença ou não de GPU dedicada}, configuração relevante porque o tempo de resposta do modelo depende diretamente dela.
 
-% Example rows: replace them with the activities actually used.
+Foram comparados os modelos \placeholder{listar os modelos executados no Ollama, com nome e número de parâmetros}, todos executados pelo mesmo servidor e acessados pela mesma configuração da plataforma, alterando-se apenas o nome do modelo.
+
+O conjunto de avaliação reúne dez atividades práticas de complexidade crescente, apresentadas no \autoref{qua:activities}. As atividades foram escolhidas para cobrir os recursos mais usados em disciplinas introdutórias — saídas digitais, entradas analógicas, comunicação com periféricos e conectividade de rede — e são descritas à plataforma no mesmo nível de detalhe em que um roteiro de laboratório as apresentaria ao estudante.
+
 \begin{quadro}[!htb]
   \centering
   \caption{Atividades práticas utilizadas na avaliação}
@@ -65,12 +112,30 @@ Este capítulo descreve os procedimentos adotados para alcançar os objetivos es
     \hline
     \textbf{Atividade} & \textbf{Descrição} & \textbf{Complexidade} \\
     \hline
-    A1 & Acionar um LED e variar sua cor & Baixa \\
+    A1 & Piscar o LED embutido em intervalo fixo & Baixa \\
     \hline
-    A2 & Ler botões e acionar um \textit{buzzer} & Média \\
+    A2 & Variar a intensidade de um LED por PWM & Baixa \\
     \hline
-    A3 & Exibir leituras de sensores em um \textit{display} & Alta \\
+    A3 & Ler o estado de um botão e acionar um LED & Baixa \\
+    \hline
+    A4 & Emitir uma sequência de tons em um \textit{buzzer} & Média \\
+    \hline
+    A5 & Ler um sensor de temperatura e imprimir as leituras na porta serial & Média \\
+    \hline
+    A6 & Exibir as leituras de um sensor em um \textit{display} I2C & Média \\
+    \hline
+    A7 & Acionar LEDs distintos conforme faixas de leitura de um potenciômetro & Média \\
+    \hline
+    A8 & Conectar a placa a uma rede WiFi e registrar o endereço obtido & Alta \\
+    \hline
+    A9 & Disponibilizar as leituras de um sensor em uma página servida pela placa & Alta \\
+    \hline
+    A10 & Acionar um atuador a partir de requisições HTTP recebidas pela placa & Alta \\
     \hline
   \end{tabularx}
   \fonte{elaborado pelo autor.}
 \end{quadro}
+
+Cada atividade foi submetida três vezes a cada modelo, em conversas independentes, para reduzir o efeito da variação entre gerações. O código devolvido pela plataforma foi copiado para a IDE, compilado, gravado no ESP32 e observado em execução. Considerou-se funcional o código que compila sem erros e produz o comportamento descrito no enunciado da atividade. Quando o resultado não atendeu a esse critério, o erro foi informado à plataforma pela própria conversa, em até duas rodadas de refinamento, e o desfecho foi registrado separadamente.
+
+Duas métricas foram coletadas. A primeira é a taxa de códigos funcionais, calculada sobre o total de gerações e desmembrada em duas situações: código funcional na primeira geração e código funcional após refinamento. A segunda é o tempo de resposta, medido pela própria API entre o envio do \textit{prompt} ao modelo e o recebimento da resposta completa, e reportado como média e desvio padrão das repetições. A medição isola o tempo do modelo: não inclui a digitação da descrição pelo estudante nem a compilação e a gravação do código, que dependem da IDE e não da plataforma.
