@@ -17,6 +17,23 @@
 \usepackage{booktabs}       % horizontal rules for tables
 \usepackage{tabularx}       % tables with flexible column widths
 \usepackage{pdfpages}       % inserts the catalog card PDF
+% Code and JSON listings shown inside floats. The literate map keeps accented
+% characters working under pdfLaTeX.
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  columns=fullflexible,
+  showstringspaces=false,
+  aboveskip=0.4\baselineskip,
+  belowskip=0.4\baselineskip,
+  literate={á}{{\'a}}1 {à}{{\`a}}1 {â}{{\^a}}1 {ã}{{\~a}}1
+           {é}{{\'e}}1 {ê}{{\^e}}1 {í}{{\'i}}1
+           {ó}{{\'o}}1 {ô}{{\^o}}1 {õ}{{\~o}}1
+           {ú}{{\'u}}1 {ç}{{\c c}}1
+           {Á}{{\'A}}1 {Ã}{{\~A}}1 {É}{{\'E}}1 {Ç}{{\c C}}1
+}
+
 \usepackage{tikz}
 \usetikzlibrary{positioning, fit, arrows.meta}
 

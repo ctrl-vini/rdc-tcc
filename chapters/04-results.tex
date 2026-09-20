@@ -1,43 +1,184 @@
 % Results and discussion: same section order as the methodology chapter.
+%
+% Sections 4.1 to 4.3 report what was built and can be confirmed against the
+% implementation. Section 4.4 reports measurements: every number there is a
+% \placeholder and must come from the evaluation runs described in Section 3.4.
 
 \chapter{Resultados e discussão}
 \label{chap:results}
 
-\placeholder{Apresentar, em um parágrafo, a organização dos resultados, que segue a ordem das seções do \autoref{chap:methodology}.}
+Este capítulo apresenta os resultados na mesma ordem das seções do \autoref{chap:methodology}. A \autoref{sec:results-architecture} descreve a plataforma implementada e o mecanismo que atende cada requisito. A \autoref{sec:results-api} apresenta os recursos da API e um exemplo de uso. A \autoref{sec:results-web} apresenta a interface. Por fim, a \autoref{sec:results-evaluation} reúne as medições obtidas nas dez atividades e discute os resultados frente aos trabalhos relacionados.
 
 \section{Requisitos e arquitetura}
 \label{sec:results-architecture}
 
-\placeholder{Apresentar os requisitos definidos e a arquitetura implementada.}
+A plataforma foi implementada segundo a arquitetura apresentada na \autoref{fig:architecture}, com as três partes em execução: a interface \textit{web} no navegador do estudante, a API REST em um servidor da rede local e o modelo de linguagem sob o Ollama no mesmo servidor. Nenhuma das partes depende de acesso à internet durante a operação.
+
+O \autoref{qua:requirements-coverage} relaciona cada requisito definido no \autoref{qua:requirements} ao mecanismo da implementação que o atende. A verificação foi feita exercitando cada requisito manualmente pela interface, \placeholder{registrar aqui o resultado dessa verificação e qualquer requisito atendido apenas parcialmente}.
+
+\begin{quadro}[!htb]
+  \centering
+  \caption{Mecanismo de implementação que atende cada requisito}
+  \label{qua:requirements-coverage}
+  \begin{tabularx}{\textwidth}{|c|X|}
+    \hline
+    \textbf{Requisito} & \textbf{Mecanismo} \\
+    \hline
+    RF01 & Lista de placas montada na interface a partir dos perfis lidos do diretório de configuração \\
+    \hline
+    RF02 & Campo de texto livre enviado à API sem tratamento prévio \\
+    \hline
+    RF03 & Serviço de montagem do \textit{prompt}, que concatena instrução de sistema, perfil da placa, histórico e pedido \\
+    \hline
+    RF04 & Recurso de envio de mensagem, que aciona o modelo e devolve código e explicação em JSON \\
+    \hline
+    RF05 & Histórico gravado em arquivo JSON por conversa e reenviado ao modelo a cada nova mensagem \\
+    \hline
+    RNF01 & Ollama e API no mesmo servidor da rede local; nenhuma chamada a serviço externo \\
+    \hline
+    RNF02 & Interface servida como conteúdo estático pela própria API, sem etapa de compilação \\
+    \hline
+    RNF03 & Perfis em arquivos JSON independentes, carregados na inicialização \\
+    \hline
+  \end{tabularx}
+  \fonte{elaborado pelo autor.}
+\end{quadro}
 
 \section{API REST}
 \label{sec:results-api}
 
-\placeholder{Apresentar os recursos da API, exemplos de requisição e resposta e a integração com o modelo.}
+Os recursos expostos pela API são apresentados no \autoref{qua:endpoints}. O conjunto é reduzido de propósito: cada requisito funcional corresponde a um recurso, sem operações adicionais.
+
+\begin{quadro}[!htb]
+  \centering
+  \caption{Recursos expostos pela API}
+  \label{qua:endpoints}
+  \begin{tabularx}{\textwidth}{|c|l|X|}
+    \hline
+    \textbf{Método} & \textbf{Caminho} & \textbf{Descrição} \\
+    \hline
+    GET & /placas & Lista os perfis de \textit{hardware} cadastrados \\
+    \hline
+    POST & /conversas & Cria uma conversa para a placa escolhida \\
+    \hline
+    POST & /conversas/\{id\}/mensagens & Envia a descrição da atividade e devolve o código gerado \\
+    \hline
+    GET & /conversas/\{id\} & Recupera o histórico de uma conversa \\
+    \hline
+  \end{tabularx}
+  \fonte{elaborado pelo autor.}
+\end{quadro}
+
+O \autoref{qua:request-example} mostra uma requisição de geração de código e a resposta correspondente. O estudante envia apenas a descrição da atividade: a placa já está associada à conversa, e o perfil de \textit{hardware} é inserido no \textit{prompt} pelo servidor, sem passar pelo cliente.
+
+\begin{quadro}[!htb]
+  \centering
+  \caption{Exemplo de requisição e resposta da API}
+  \label{qua:request-example}
+  \begin{minipage}{\textwidth}
+    \begin{lstlisting}
+POST /conversas/7a1c/mensagens
+{
+  "descricao": "Acender o LED quando o botao for pressionado"
+}
+
+200 OK
+{
+  "codigo": "const int LED = 2;\n...",
+  "explicacao": "O pino 2 e configurado como saida ...",
+  "modelo": "<modelo utilizado>",
+  "tempo_ms": 0
+}
+    \end{lstlisting}
+  \end{minipage}
+  \fonte{elaborado pelo autor.}
+\end{quadro}
+
+O campo \texttt{tempo\_ms} registra o intervalo entre o envio do \textit{prompt} ao modelo e o recebimento da resposta completa. É esse campo que alimenta as medições de tempo apresentadas na \autoref{sec:results-evaluation}, o que dispensa instrumentação externa durante os testes.
 
 \section{Interface \textit{web}}
 \label{sec:results-web}
 
-\placeholder{Apresentar as telas da interface com figuras.}
+\placeholder{Inserir aqui a figura com a captura de tela da interface, com a placa selecionada, a descrição da atividade preenchida e o código devolvido pelo modelo, e comentar em um parágrafo o fluxo que a figura mostra}
 
 \section{Avaliação da plataforma}
 \label{sec:results-evaluation}
 
-\placeholder{Apresentar e discutir os resultados da \autoref{tab:evaluation}.}
+As dez atividades do \autoref{qua:activities} foram submetidas três vezes a cada modelo, conforme o procedimento da \autoref{sec:method-evaluation}, totalizando \placeholder{informar o total de gerações} gerações de código.
 
-% Values to be filled in after the tests.
+\subsection{Taxa de códigos funcionais}
+\label{subsec:results-functional}
+
+A \autoref{tab:functional-rate} apresenta, para cada atividade, quantas das três gerações produziram código funcional já na primeira resposta e quantas passaram a funcionar após as rodadas de refinamento.
+
 \begin{table}[!htb]
   \centering
-  \caption{Resultados da avaliação por atividade}
-  \label{tab:evaluation}
-  \begin{tabular}{cccc}
+  \caption{Códigos funcionais por atividade, em três gerações por modelo}
+  \label{tab:functional-rate}
+  \begin{tabular}{lcccc}
     \toprule
-    Atividade & Código funcional & Tentativas & Tempo de resposta (s) \\
+    & \multicolumn{2}{c}{\placeholder{modelo 1}} & \multicolumn{2}{c}{\placeholder{modelo 2}} \\
+    \cmidrule(lr){2-3} \cmidrule(lr){4-5}
+    Atividade & 1.\textsuperscript{a} geração & Após refino & 1.\textsuperscript{a} geração & Após refino \\
     \midrule
-    A1 & -- & -- & -- \\
-    A2 & -- & -- & -- \\
-    A3 & -- & -- & -- \\
+    A1    & -- & -- & -- & -- \\
+    A2    & -- & -- & -- & -- \\
+    A3    & -- & -- & -- & -- \\
+    A4    & -- & -- & -- & -- \\
+    A5    & -- & -- & -- & -- \\
+    A6    & -- & -- & -- & -- \\
+    A7    & -- & -- & -- & -- \\
+    A8    & -- & -- & -- & -- \\
+    A9    & -- & -- & -- & -- \\
+    A10   & -- & -- & -- & -- \\
+    \midrule
+    Total & -- & -- & -- & -- \\
     \bottomrule
   \end{tabular}
   \fonte{elaborado pelo autor.}
 \end{table}
+
+\placeholder{Discutir a tabela: taxa global de cada modelo; se a taxa cai com a complexidade das atividades; quais atividades concentraram as falhas; que tipo de erro apareceu (pino trocado, biblioteca inexistente, código que não compila, comportamento diferente do pedido); e quanto o refinamento recuperou}
+
+\subsection{Tempo de resposta}
+\label{subsec:results-time}
+
+A \autoref{tab:response-time} apresenta o tempo de resposta do modelo por atividade, em segundos, como média e desvio padrão das três gerações.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tempo de resposta por atividade, em segundos}
+  \label{tab:response-time}
+  \begin{tabular}{lcc}
+    \toprule
+    Atividade & \placeholder{modelo 1} & \placeholder{modelo 2} \\
+    \midrule
+    A1    & -- & -- \\
+    A2    & -- & -- \\
+    A3    & -- & -- \\
+    A4    & -- & -- \\
+    A5    & -- & -- \\
+    A6    & -- & -- \\
+    A7    & -- & -- \\
+    A8    & -- & -- \\
+    A9    & -- & -- \\
+    A10   & -- & -- \\
+    \midrule
+    Média & -- & -- \\
+    \bottomrule
+  \end{tabular}
+  \fonte{elaborado pelo autor.}
+\end{table}
+
+\placeholder{Discutir a tabela: tempo médio de cada modelo; relação entre o tempo e o tamanho do código gerado; custo da primeira requisição, que inclui o carregamento do modelo em memória; e se o tempo observado é compatível com o uso durante uma aula}
+
+\subsection{Discussão}
+\label{subsec:results-discussion}
+
+Os resultados permitem responder à pergunta central deste trabalho: se um modelo aberto executado na infraestrutura da instituição é suficiente para a tarefa que \citeonline{fruett2024} resolvem com um serviço comercial em nuvem. A estratégia de contexto é a mesma nos dois casos — a descrição do \textit{hardware} precede o pedido do estudante —, e a diferença está no modelo e em onde ele executa. \placeholder{Posicionar a taxa de códigos funcionais obtida frente ao que o trabalho da BitDogLab relata, indicando se a execução local implica perda de qualidade e de que ordem}
+
+Frente aos demais trabalhos comparados no \autoref{qua:related-work}, a contribuição é de outra natureza. \citeonline{duarte2024} e \citeonline{souza2014} reduzem o custo do recurso didático, e \citeonline{parreira2021} remove a necessidade do dispositivo físico; nenhum deles atua sobre a etapa de escrita do código, que é justamente onde a plataforma proposta intervém. Os dois conjuntos de resultados são, portanto, complementares: a plataforma pode ser aplicada sobre qualquer um desses recursos didáticos, desde que exista um perfil de \textit{hardware} correspondente.
+
+Do ponto de vista de redes, a operação integralmente em rede local mostrou-se \placeholder{comentar a estabilidade da comunicação entre navegador, API e Ollama, e se a rede local representou algum gargalo frente ao tempo de inferência do modelo}. Esse é o compromisso central discutido na \autoref{sec:llm}: troca-se o acesso a modelos maiores pela independência de conexão externa, pela ausência de custo por requisição e pela permanência dos dados na instituição.
+
+Três limitações devem ser consideradas na leitura destes resultados. A primeira é o tamanho da amostra: dez atividades com três gerações cada oferecem indicação de tendência, não significância estatística. A segunda é que a avaliação do comportamento do código foi feita pelo autor, e não por estudantes, de modo que a clareza das explicações geradas não foi medida junto ao público-alvo. A terceira é que os tempos dependem do servidor utilizado, descrito na \autoref{sec:method-evaluation}, e não se transferem diretamente para outras configurações.
