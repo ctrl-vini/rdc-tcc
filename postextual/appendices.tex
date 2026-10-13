@@ -5,6 +5,47 @@
 \chapter{Descrição do \textit{hardware} da placa}
 \label{app:hardware-profile}
 
-\placeholder{Inserir o perfil de \textit{hardware} do ESP32 (arquivo JSON com os componentes, os pinos e as observações), indicando os campos enviados ao modelo como contexto.}
+Este apêndice apresenta o perfil de \textit{hardware} do ESP32 DevKit V1 na forma em que é enviado ao modelo, dentro da mensagem de sistema de cada requisição. O arquivo completo do perfil contém ainda a disposição dos pinos na placa, a placa a selecionar na Arduino IDE e as instruções de ligação de cada componente, informações usadas apenas pela interface e omitidas do \textit{prompt}. O perfil é enviado ao modelo em uma única linha; as quebras de linha abaixo foram acrescentadas para facilitar a leitura.
+
+\begin{lstlisting}
+{
+  "id": "esp32",
+  "name": "ESP32 DevKit V1",
+  "microcontroller": "ESP32 (dual-core Xtensa LX6, 240 MHz, WiFi e Bluetooth)",
+  "language": "C++",
+  "framework": "Arduino (núcleo ESP32)",
+  "components": [
+    {"name": "LED embutido", "type": "saída digital",
+     "pins": [{"gpio": 2, "role": null}]},
+    {"name": "LED verde", "type": "saída digital",
+     "pins": [{"gpio": 25, "role": null}]},
+    {"name": "LED amarelo", "type": "saída digital",
+     "pins": [{"gpio": 26, "role": null}]},
+    {"name": "LED vermelho", "type": "saída digital",
+     "pins": [{"gpio": 27, "role": null}]},
+    {"name": "Botão", "type": "entrada digital com pull-up interno",
+     "pins": [{"gpio": 4, "role": null}]},
+    {"name": "Buzzer", "type": "buzzer passivo, saída PWM",
+     "pins": [{"gpio": 18, "role": null}]},
+    {"name": "Sensor DHT22", "type": "sensor de temperatura e umidade, digital de um fio",
+     "pins": [{"gpio": 15, "role": null}]},
+    {"name": "Potenciômetro", "type": "entrada analógica (ADC de 12 bits, 0 a 4095)",
+     "pins": [{"gpio": 34, "role": null}]},
+    {"name": "Display OLED", "type": "SSD1306 128x64, I2C, endereço 0x3C",
+     "pins": [{"gpio": 21, "role": "SDA"}, {"gpio": 22, "role": "SCL"}]},
+    {"name": "Relé", "type": "módulo relé, saída digital ativa em nível alto",
+     "pins": [{"gpio": 23, "role": null}]}
+  ],
+  "notes": [
+    "Os GPIO 34 a 39 são somente entrada e não têm pull-up nem pull-down internos.",
+    "Os pinos do ADC2 não leem valores analógicos com o WiFi ligado; entradas analógicas usam pinos do ADC1 (GPIO 32 a 39).",
+    "Se o estudante pedir para trocar um componente de pino, mantenha o nome da constante e use um pino livre: GPIO 13, 16, 17, 19, 32 ou 33. Evite os GPIO 5, 12, 14 e 15, que definem o modo de boot ou mudam de estado ao ligar a placa.",
+    "Use as bibliotecas Adafruit SSD1306 e Adafruit GFX para o display. Com I2C, inicie o barramento com Wire.begin(SDA_PIN, SCL_PIN), passando os pinos do display.",
+    "Use a biblioteca DHT sensor library, da Adafruit, para o DHT22: crie o sensor com DHT dht(pino, DHT22), e readTemperature() já devolve graus Celsius.",
+    "Para PWM, use analogWrite(pino, valor); para o buzzer, tone(pino, frequência) e noTone(pino). Não use ledcSetup nem ledcAttachPin, que não existem no núcleo ESP32 3.x.",
+    "O monitor serial usa 115200 baud."
+  ]
+}
+\end{lstlisting}
 
 \end{apendicesenv}
