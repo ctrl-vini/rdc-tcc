@@ -12,7 +12,9 @@ Este capítulo apresenta os resultados na mesma ordem das seções do \autoref{c
 \section{Requisitos e arquitetura}
 \label{sec:results-architecture}
 
-A plataforma foi implementada segundo a arquitetura apresentada na \autoref{fig:architecture}, com as três partes em execução: a interface \textit{web} no navegador do estudante, a API REST em um servidor da rede local e o modelo de linguagem sob o Ollama no mesmo servidor. Nenhuma das partes depende de acesso à internet durante a operação.
+A plataforma, denominada Duckoder, foi implementada segundo a arquitetura apresentada na \autoref{fig:architecture}, com as três partes em execução: a interface \textit{web} no navegador do estudante, a API REST em um servidor da rede local e o modelo de linguagem sob o Ollama no mesmo servidor. Nenhuma das partes depende de acesso à internet durante a operação. O código-fonte está disponível em \url{https://github.com/ctrl-vini/duckoder}.
+
+Além da execução na rede local, a mesma imagem de contêiner foi publicada, para demonstração, em uma instância de nuvem acessível em \url{https://www.duckoder.com.br}. Também nesse caso o modelo executa no mesmo servidor da API, de modo que as interações não são enviadas a serviços de modelos de linguagem de terceiros; a publicação apenas dá acesso à plataforma fora da rede da instituição, sem alterar a arquitetura.
 
 O \autoref{qua:requirements-coverage} relaciona cada requisito definido no \autoref{qua:requirements} ao mecanismo da implementação que o atende. A verificação foi feita exercitando cada requisito manualmente pela interface, \placeholder{registrar aqui o resultado dessa verificação e qualquer requisito atendido apenas parcialmente}.
 
@@ -26,19 +28,21 @@ O \autoref{qua:requirements-coverage} relaciona cada requisito definido no \auto
     \hline
     RF01 & Lista de placas montada na interface a partir dos perfis lidos do diretório de configuração \\
     \hline
-    RF02 & Campo de texto livre enviado à API sem tratamento prévio \\
+    RF02 & Linha de comando da interface, cujo texto é enviado à API sem tratamento prévio \\
     \hline
-    RF03 & Serviço de montagem do \textit{prompt}, que concatena instrução de sistema, perfil da placa, histórico e pedido \\
+    RF03 & Serviço de montagem do \textit{prompt}, que monta a lista de mensagens enviada ao modelo: instrução de sistema com o perfil da placa, histórico e pedido \\
     \hline
     RF04 & Recurso de envio de mensagem, que aciona o modelo e devolve código e explicação em JSON \\
     \hline
     RF05 & Histórico gravado em arquivo JSON por conversa e reenviado ao modelo a cada nova mensagem \\
     \hline
-    RNF01 & Ollama e API no mesmo servidor da rede local; nenhuma chamada a serviço externo \\
+    RF06 & Serviço que identifica os pinos no código gerado e painel da placa com as ligações de cada versão do código \\
+    \hline
+    RNF01 & Ollama e API no mesmo servidor da rede local; nenhuma chamada a serviço externo nem recurso da interface carregado da internet \\
     \hline
     RNF02 & Interface servida como conteúdo estático pela própria API, sem etapa de compilação \\
     \hline
-    RNF03 & Perfis em arquivos JSON independentes, carregados na inicialização \\
+    RNF03 & Perfis em arquivos JSON independentes, validados e carregados na inicialização \\
     \hline
   \end{tabularx}
   \fonte{elaborado pelo autor.}
@@ -47,29 +51,35 @@ O \autoref{qua:requirements-coverage} relaciona cada requisito definido no \auto
 \section{API REST}
 \label{sec:results-api}
 
-Os recursos expostos pela API são apresentados no \autoref{qua:endpoints}. O conjunto é reduzido de propósito: cada requisito funcional corresponde a um recurso, sem operações adicionais.
+Os recursos expostos pela API são apresentados no \autoref{qua:endpoints}. Os caminhos e os campos seguem a língua inglesa, como o restante do código-fonte; apenas os textos lidos pelo estudante estão em português. Os quatro primeiros recursos da lista atendem ao fluxo principal, do RF01 ao RF05; o perfil completo da placa e o recurso de uso de pinos alimentam o painel da placa (RF06); e o último informa a versão da plataforma em execução.
 
 \begin{quadro}[!htb]
   \centering
   \caption{Recursos expostos pela API}
   \label{qua:endpoints}
-  \begin{tabularx}{\textwidth}{|c|l|X|}
+  \begin{tabularx}{\textwidth}{|c|>{\raggedright\arraybackslash}p{5.4cm}|X|}
     \hline
     \textbf{Método} & \textbf{Caminho} & \textbf{Descrição} \\
     \hline
-    GET & /placas & Lista os perfis de \textit{hardware} cadastrados \\
+    GET & /boards & Lista as placas cadastradas \\
     \hline
-    POST & /conversas & Cria uma conversa para a placa escolhida \\
+    POST & /conversations & Cria uma conversa para a placa escolhida \\
     \hline
-    POST & /conversas/\{id\}/mensagens & Envia a descrição da atividade e devolve o código gerado \\
+    POST & /conversations/\{id\}/messages & Envia a descrição da atividade e devolve a resposta do modelo \\
     \hline
-    GET & /conversas/\{id\} & Recupera o histórico de uma conversa \\
+    GET & /conversations/\{id\} & Recupera o histórico de uma conversa \\
+    \hline
+    GET & /boards/\{id\} & Devolve o perfil completo de uma placa, com a disposição dos pinos e as ligações \\
+    \hline
+    GET & /conversations/\{id\}/messages/\newline\{message\_id\}/pin-usage & Indica os componentes e os pinos usados pelo código de uma resposta \\
+    \hline
+    GET & /version & Informa o nome e a versão da plataforma \\
     \hline
   \end{tabularx}
   \fonte{elaborado pelo autor.}
 \end{quadro}
 
-O \autoref{qua:request-example} mostra uma requisição de geração de código e a resposta correspondente. O estudante envia apenas a descrição da atividade: a placa já está associada à conversa, e o perfil de \textit{hardware} é inserido no \textit{prompt} pelo servidor, sem passar pelo cliente.
+O \autoref{qua:request-example} mostra uma requisição de geração de código e a resposta correspondente. O estudante envia apenas a descrição da atividade, no campo \texttt{content}: a placa já está associada à conversa, e o perfil de \textit{hardware} é inserido no \textit{prompt} pelo servidor, sem passar pelo cliente.
 
 \begin{quadro}[!htb]
   \centering
@@ -77,24 +87,33 @@ O \autoref{qua:request-example} mostra uma requisição de geração de código 
   \label{qua:request-example}
   \begin{minipage}{\textwidth}
     \begin{lstlisting}
-POST /conversas/7a1c/mensagens
+POST /conversations/9017c7c3.../messages
 {
-  "descricao": "Acender o LED quando o botao for pressionado"
+  "content": "Acenda o LED vermelho enquanto o botão estiver pressionado"
 }
 
-200 OK
+201 Created
 {
-  "codigo": "const int LED = 2;\n...",
-  "explicacao": "O pino 2 e configurado como saida ...",
-  "modelo": "<modelo utilizado>",
-  "tempo_ms": 0
+  "id": "23887cdf...",
+  "role": "assistant",
+  "content": "<resposta completa do modelo>",
+  "code": "const int LED_PIN = 27;\nconst int BUTTON_PIN = 4;\n...",
+  "explanation": "Esse código faz o LED vermelho acender quando ...",
+  "metrics": {
+    "model": "<modelo utilizado>",
+    "elapsed_ms": 0,
+    "load_ms": 0,
+    "output_tokens": 0,
+    "prompt_version": "v6"
+  },
+  "created_at": "2026-10-13T06:28:53Z"
 }
     \end{lstlisting}
   \end{minipage}
   \fonte{elaborado pelo autor.}
 \end{quadro}
 
-O campo \texttt{tempo\_ms} registra o intervalo entre o envio do \textit{prompt} ao modelo e o recebimento da resposta completa. É esse campo que alimenta as medições de tempo apresentadas na \autoref{sec:results-evaluation}, o que dispensa instrumentação externa durante os testes.
+O campo \texttt{content} guarda a resposta do modelo na íntegra, e as duas partes separadas pela API ficam nos campos \texttt{code} e \texttt{explanation}. O objeto \texttt{metrics} registra o modelo que gerou a resposta, o intervalo entre o envio do \textit{prompt} ao modelo e o recebimento da resposta completa (\texttt{elapsed\_ms}), a parcela desse intervalo gasta no carregamento do modelo em memória (\texttt{load\_ms}), a quantidade de \textit{tokens} gerados e a versão da instrução de sistema utilizada. São esses campos que alimentam as medições de tempo apresentadas na \autoref{sec:results-evaluation}, o que dispensa instrumentação externa durante os testes.
 
 \section{Interface \textit{web}}
 \label{sec:results-web}
