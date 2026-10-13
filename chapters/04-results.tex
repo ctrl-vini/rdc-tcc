@@ -16,7 +16,9 @@ A plataforma, denominada Duckoder, foi implementada segundo a arquitetura aprese
 
 Além da execução na rede local, a mesma imagem de contêiner foi publicada, para demonstração, em uma instância de nuvem acessível em \url{https://www.duckoder.com.br}. Também nesse caso o modelo executa no mesmo servidor da API, de modo que as interações não são enviadas a serviços de modelos de linguagem de terceiros; a publicação apenas dá acesso à plataforma fora da rede da instituição, sem alterar a arquitetura.
 
-O \autoref{qua:requirements-coverage} relaciona cada requisito definido no \autoref{qua:requirements} ao mecanismo da implementação que o atende. A verificação foi feita exercitando cada requisito manualmente pela interface, \placeholder{registrar aqui o resultado dessa verificação e qualquer requisito atendido apenas parcialmente}.
+O \autoref{qua:requirements-coverage} relaciona cada requisito definido no \autoref{qua:requirements} ao mecanismo da implementação que o atende. A verificação foi feita exercitando cada requisito manualmente pela interface da instância de demonstração, em uma conversa com o ESP32 composta por um pedido inicial e um pedido de refinamento, apresentada na \autoref{sec:results-web}. A lista de placas exibiu os cinco perfis cadastrados (RF01), e o pedido escrito em texto livre (RF02) foi respondido com código e explicação (RF03 e RF04). O código gerado usou os pinos que o perfil atribui ao LED vermelho e ao botão sem que o estudante os informasse, o que confirma que a descrição do \textit{hardware} foi inserida no \textit{prompt} pelo servidor. O pedido de refinamento foi aplicado sobre o código anterior (RF05), e o painel da placa apresentou os componentes usados por cada versão e a mudança de pino do LED (RF06). Todas as requisições registradas pelo navegador foram dirigidas ao próprio servidor da plataforma, e a única comunicação de saída da API é a chamada ao Ollama no mesmo servidor (RNF01); do lado do estudante, bastou o navegador (RNF02). Os perfis das quatro placas Arduino foram acrescentados à plataforma em uma alteração composta apenas por novos arquivos JSON, sem mudança no código-fonte (RNF03).
+
+Além da verificação manual, o código conta com 87 testes automatizados, que substituem o modelo por uma implementação simulada e são executados a cada alteração enviada ao repositório. Todos os requisitos foram atendidos; a \autoref{sec:results-web} discute uma limitação observada no painel da placa.
 
 \begin{quadro}[!htb]
   \centering
@@ -79,7 +81,7 @@ Os recursos expostos pela API são apresentados no \autoref{qua:endpoints}. Os c
   \fonte{elaborado pelo autor.}
 \end{quadro}
 
-O \autoref{qua:request-example} mostra uma requisição de geração de código e a resposta correspondente. O estudante envia apenas a descrição da atividade, no campo \texttt{content}: a placa já está associada à conversa, e o perfil de \textit{hardware} é inserido no \textit{prompt} pelo servidor, sem passar pelo cliente.
+O \autoref{qua:request-example} mostra uma requisição de geração de código e a resposta correspondente, retiradas da conversa apresentada na \autoref{sec:results-web}. O estudante envia apenas a descrição da atividade, no campo \texttt{content}: a placa já está associada à conversa, e o perfil de \textit{hardware} é inserido no \textit{prompt} pelo servidor, sem passar pelo cliente.
 
 \begin{quadro}[!htb]
   \centering
@@ -87,7 +89,7 @@ O \autoref{qua:request-example} mostra uma requisição de geração de código 
   \label{qua:request-example}
   \begin{minipage}{\textwidth}
     \begin{lstlisting}
-POST /conversations/9017c7c3.../messages
+POST /conversations/f465b7c9.../messages
 {
   "content": "Acenda o LED vermelho enquanto o botão estiver pressionado"
 }
@@ -100,13 +102,13 @@ POST /conversations/9017c7c3.../messages
   "code": "const int LED_PIN = 27;\nconst int BUTTON_PIN = 4;\n...",
   "explanation": "Esse código faz o LED vermelho acender quando ...",
   "metrics": {
-    "model": "<modelo utilizado>",
-    "elapsed_ms": 0,
-    "load_ms": 0,
-    "output_tokens": 0,
+    "model": "qwen2.5-coder:7b",
+    "elapsed_ms": 217882,
+    "load_ms": 35262,
+    "output_tokens": 161,
     "prompt_version": "v6"
   },
-  "created_at": "2026-10-13T06:28:53Z"
+  "created_at": "2026-10-13T06:28:53.950865Z"
 }
     \end{lstlisting}
   \end{minipage}
@@ -118,7 +120,27 @@ O campo \texttt{content} guarda a resposta do modelo na íntegra, e as duas part
 \section{Interface \textit{web}}
 \label{sec:results-web}
 
-\placeholder{Inserir aqui a figura com a captura de tela da interface, com a placa selecionada, a descrição da atividade preenchida e o código devolvido pelo modelo, e comentar em um parágrafo o fluxo que a figura mostra}
+A \autoref{fig:interface-conversation} mostra a interface ao fim da conversa usada na verificação dos requisitos. A placa escolhida, o ESP32 DevKit V1, aparece na barra superior. O estudante pediu, em texto livre, que o LED vermelho acendesse enquanto o botão estivesse pressionado, e a plataforma devolveu a versão 1 do código, seguida da explicação gerada pelo modelo. Em seguida, o estudante informou que o GPIO 27 havia queimado e pediu que o LED fosse ligado em outro pino livre; a versão 2 manteve o restante do código e alterou apenas a constante do pino do LED. Cada versão traz as ações de cópia e de visualização das ligações, e cada resposta termina com o modelo que a gerou e o tempo de geração. Os tempos exibidos, de cerca de 3,6 minutos, correspondem à instância de demonstração, que executa o modelo apenas no processador central, sem aceleração por placa gráfica; os tempos do servidor de avaliação são apresentados na \autoref{subsec:results-time}.
+
+\begin{figure}[!htbp]
+  \centering
+  \caption{Interface do Duckoder ao fim de uma conversa com refinamento}
+  \label{fig:interface-conversation}
+  \includegraphics[width=0.78\textwidth]{interface-conversa}
+  \fonte{elaborado pelo autor.}
+\end{figure}
+
+A \autoref{fig:board-pane} mostra o painel da placa aberto na versão 2. O desenho destaca apenas os pinos usados pelo código, D23 e D4, com o nome do componente ligado a cada um, e o painel informa qual placa selecionar na Arduino IDE. Como o LED vermelho estava no GPIO 27 na versão anterior, um aviso indica que o componente mudou de pino e onde ligar o fio. Abaixo do desenho, cada componente aparece com o pino ao qual cada terminal deve ser ligado.
+
+\begin{figure}[!htbp]
+  \centering
+  \caption{Painel da placa com as ligações da versão 2 do código}
+  \label{fig:board-pane}
+  \includegraphics[width=0.85\textwidth]{interface-painel-placa}
+  \fonte{elaborado pelo autor.}
+\end{figure}
+
+O exemplo também expõe um erro do modelo. As observações do perfil indicam os pinos livres a usar quando o estudante pede a troca de pino (\autoref{app:hardware-profile}), mas o modelo escolheu o GPIO 23, que o perfil atribui ao relé, e afirmou na explicação que se tratava de um pino livre. O painel identificou corretamente a nova ligação do LED, mas não alerta quando o novo pino já pertence a outro componente do perfil: um estudante que mantivesse o relé ligado à placa teria os dois componentes no mesmo pino. Essa verificação fica como limitação da implementação atual.
 
 \section{Avaliação da plataforma}
 \label{sec:results-evaluation}
