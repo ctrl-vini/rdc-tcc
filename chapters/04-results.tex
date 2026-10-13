@@ -1,8 +1,9 @@
 % Results and discussion: same section order as the methodology chapter.
 %
 % Sections 4.1 to 4.3 report what was built and can be confirmed against the
-% implementation. Section 4.4 reports measurements: every number there is a
-% \placeholder and must come from the evaluation runs described in Section 3.4.
+% implementation. Section 4.4 reports the evaluation runs described in Section
+% 3.4: response times come from TCC/avaliacao/geracoes.csv, and the functional
+% rate waits for the bench results.
 
 \chapter{Resultados e discussão}
 \label{chap:results}
@@ -14,9 +15,7 @@ Este capítulo apresenta os resultados na mesma ordem das seções do \autoref{c
 
 A plataforma, denominada Duckoder, foi implementada segundo a arquitetura apresentada na \autoref{fig:architecture}, com as três partes em execução: a interface \textit{web} no navegador do estudante, a API REST em um servidor da rede local e o modelo de linguagem sob o Ollama no mesmo servidor. Nenhuma das partes depende de acesso à internet durante a operação. O código-fonte está disponível em \url{https://github.com/ctrl-vini/duckoder}.
 
-Além da execução na rede local, a mesma imagem de contêiner foi publicada, para demonstração, em uma instância de nuvem acessível em \url{https://www.duckoder.com.br}. Também nesse caso o modelo executa no mesmo servidor da API, de modo que as interações não são enviadas a serviços de modelos de linguagem de terceiros; a publicação apenas dá acesso à plataforma fora da rede da instituição, sem alterar a arquitetura.
-
-O \autoref{qua:requirements-coverage} relaciona cada requisito definido no \autoref{qua:requirements} ao mecanismo da implementação que o atende. A verificação foi feita exercitando cada requisito manualmente pela interface da instância de demonstração, em uma conversa com o ESP32 composta por um pedido inicial e um pedido de refinamento, apresentada na \autoref{sec:results-web}. A lista de placas exibiu os cinco perfis cadastrados (RF01), e o pedido escrito em texto livre (RF02) foi respondido com código e explicação (RF03 e RF04). O código gerado usou os pinos que o perfil atribui ao LED vermelho e ao botão sem que o estudante os informasse, o que confirma que a descrição do \textit{hardware} foi inserida no \textit{prompt} pelo servidor. O pedido de refinamento foi aplicado sobre o código anterior (RF05), e o painel da placa apresentou os componentes usados por cada versão e a mudança de pino do LED (RF06). Todas as requisições registradas pelo navegador foram dirigidas ao próprio servidor da plataforma, e a única comunicação de saída da API é a chamada ao Ollama no mesmo servidor (RNF01); do lado do estudante, bastou o navegador (RNF02). Os perfis das quatro placas Arduino foram acrescentados à plataforma em uma alteração composta apenas por novos arquivos JSON, sem mudança no código-fonte (RNF03).
+O \autoref{qua:requirements-coverage} relaciona cada requisito definido no \autoref{qua:requirements} ao mecanismo da implementação que o atende. A verificação foi feita exercitando cada requisito manualmente pela interface, no servidor descrito na \autoref{sec:method-evaluation}, em uma conversa com o ESP32 composta por um pedido inicial e um pedido de refinamento, apresentada na \autoref{sec:results-web}. A lista de placas exibiu os cinco perfis cadastrados (RF01), e o pedido escrito em texto livre (RF02) foi respondido com código e explicação (RF03 e RF04). O código gerado usou os pinos que o perfil atribui ao LED vermelho e ao botão sem que o estudante os informasse, o que confirma que a descrição do \textit{hardware} foi inserida no \textit{prompt} pelo servidor. O pedido de refinamento foi aplicado sobre o código anterior (RF05), e o painel da placa apresentou os componentes usados por cada versão e a mudança de pino do LED (RF06). Todas as requisições registradas pelo navegador foram dirigidas ao próprio servidor da plataforma, e a única comunicação de saída da API é a chamada ao Ollama no mesmo servidor (RNF01); do lado do estudante, bastou o navegador (RNF02). Os perfis das quatro placas Arduino foram acrescentados à plataforma em uma alteração composta apenas por novos arquivos JSON, sem mudança no código-fonte (RNF03).
 
 Além da verificação manual, o código conta com 87 testes automatizados, que substituem o modelo por uma implementação simulada e são executados a cada alteração enviada ao repositório. Todos os requisitos foram atendidos; a \autoref{sec:results-web} discute uma limitação observada no painel da placa.
 
@@ -89,26 +88,26 @@ O \autoref{qua:request-example} mostra uma requisição de geração de código 
   \label{qua:request-example}
   \begin{minipage}{\textwidth}
     \begin{lstlisting}
-POST /conversations/f465b7c9.../messages
+POST /conversations/1910f627.../messages
 {
   "content": "Acenda o LED vermelho enquanto o botão estiver pressionado"
 }
 
 201 Created
 {
-  "id": "23887cdf...",
+  "id": "e30b4912...",
   "role": "assistant",
   "content": "<resposta completa do modelo>",
-  "code": "const int LED_PIN = 27;\nconst int BUTTON_PIN = 4;\n...",
-  "explanation": "Esse código faz o LED vermelho acender quando ...",
+  "code": "const int BUTTON_PIN = 4;\nconst int RED_LED_PIN = 27;\n...",
+  "explanation": "Este código acende o LED vermelho enquanto ...",
   "metrics": {
     "model": "qwen2.5-coder:7b",
-    "elapsed_ms": 217882,
-    "load_ms": 35262,
-    "output_tokens": 161,
+    "elapsed_ms": 24113,
+    "load_ms": 13617,
+    "output_tokens": 129,
     "prompt_version": "v6"
   },
-  "created_at": "2026-10-13T06:28:53.950865Z"
+  "created_at": "2026-10-13T09:16:41.321725Z"
 }
     \end{lstlisting}
   \end{minipage}
@@ -120,7 +119,7 @@ O campo \texttt{content} guarda a resposta do modelo na íntegra, e as duas part
 \section{Interface \textit{web}}
 \label{sec:results-web}
 
-A \autoref{fig:interface-conversation} mostra a interface ao fim da conversa usada na verificação dos requisitos. A placa escolhida, o ESP32 DevKit V1, aparece na barra superior. O estudante pediu, em texto livre, que o LED vermelho acendesse enquanto o botão estivesse pressionado, e a plataforma devolveu a versão 1 do código, seguida da explicação gerada pelo modelo. Em seguida, o estudante informou que o GPIO 27 havia queimado e pediu que o LED fosse ligado em outro pino livre; a versão 2 manteve o restante do código e alterou apenas a constante do pino do LED. Cada versão traz as ações de cópia e de visualização das ligações, e cada resposta termina com o modelo que a gerou e o tempo de geração. Os tempos exibidos, de cerca de 3,6 minutos, correspondem à instância de demonstração, que executa o modelo apenas no processador central, sem aceleração por placa gráfica; os tempos do servidor de avaliação são apresentados na \autoref{subsec:results-time}.
+A \autoref{fig:interface-conversation} mostra a interface ao fim da conversa usada na verificação dos requisitos. A placa escolhida, o ESP32 DevKit V1, aparece na barra superior. O estudante pediu, em texto livre, que o LED vermelho acendesse enquanto o botão estivesse pressionado, e a plataforma devolveu a versão 1 do código, seguida da explicação gerada pelo modelo. Em seguida, o estudante informou que o GPIO 27 havia queimado e pediu que o LED fosse ligado em outro pino livre; a versão 2 manteve o restante do código e alterou apenas a constante do pino do LED. Cada versão traz as ações de cópia e de visualização das ligações, e cada resposta termina com o modelo que a gerou e o tempo de geração. A primeira resposta levou 24,1~s, dos quais 13,6~s foram gastos no carregamento do modelo em memória, por ser a primeira requisição após a inicialização do servidor; a segunda, com o modelo já carregado, levou 7,1~s.
 
 \begin{figure}[!htbp]
   \centering
@@ -140,12 +139,12 @@ A \autoref{fig:board-pane} mostra o painel da placa aberto na versão 2. O desen
   \fonte{elaborado pelo autor.}
 \end{figure}
 
-O exemplo também expõe um erro do modelo. As observações do perfil indicam os pinos livres a usar quando o estudante pede a troca de pino (\autoref{app:hardware-profile}), mas o modelo escolheu o GPIO 23, que o perfil atribui ao relé, e afirmou na explicação que se tratava de um pino livre. O painel identificou corretamente a nova ligação do LED, mas não alerta quando o novo pino já pertence a outro componente do perfil: um estudante que mantivesse o relé ligado à placa teria os dois componentes no mesmo pino. Essa verificação fica como limitação da implementação atual.
+O exemplo também expõe um erro do modelo. As observações do perfil indicam os pinos livres a usar quando o estudante pede a troca de pino (\autoref{app:hardware-profile}), mas o modelo escolheu o GPIO 23, que o perfil atribui ao relé. O painel identificou corretamente a nova ligação do LED, mas não alerta quando o novo pino já pertence a outro componente do perfil: um estudante que mantivesse o relé ligado à placa teria os dois componentes no mesmo pino. Essa verificação fica como limitação da implementação atual.
 
 \section{Avaliação da plataforma}
 \label{sec:results-evaluation}
 
-As dez atividades do \autoref{qua:activities} foram submetidas três vezes a cada modelo, conforme o procedimento da \autoref{sec:method-evaluation}, totalizando \placeholder{informar o total de gerações} gerações de código.
+As dez atividades do \autoref{qua:activities} foram submetidas três vezes a cada modelo, conforme o procedimento da \autoref{sec:method-evaluation}, totalizando 60 gerações de código, 30 por modelo. Todas as respostas trouxeram um bloco de código.
 
 \subsection{Taxa de códigos funcionais}
 \label{subsec:results-functional}
@@ -158,7 +157,7 @@ A \autoref{tab:functional-rate} apresenta, para cada atividade, quantas das trê
   \label{tab:functional-rate}
   \begin{tabular}{lcccc}
     \toprule
-    & \multicolumn{2}{c}{\placeholder{modelo 1}} & \multicolumn{2}{c}{\placeholder{modelo 2}} \\
+    & \multicolumn{2}{c}{Qwen2.5-Coder 7B} & \multicolumn{2}{c}{Llama 3.1 8B} \\
     \cmidrule(lr){2-3} \cmidrule(lr){4-5}
     Atividade & 1.\textsuperscript{a} geração & Após refino & 1.\textsuperscript{a} geração & Após refino \\
     \midrule
@@ -184,7 +183,7 @@ A \autoref{tab:functional-rate} apresenta, para cada atividade, quantas das trê
 \subsection{Tempo de resposta}
 \label{subsec:results-time}
 
-A \autoref{tab:response-time} apresenta o tempo de resposta do modelo por atividade, em segundos, como média e desvio padrão das três gerações.
+A \autoref{tab:response-time} apresenta o tempo de resposta do modelo por atividade, em segundos, como média e desvio padrão das três gerações. Os valores são os registrados pela API no campo \texttt{elapsed\_ms}.
 
 \begin{table}[!htb]
   \centering
@@ -192,26 +191,28 @@ A \autoref{tab:response-time} apresenta o tempo de resposta do modelo por ativid
   \label{tab:response-time}
   \begin{tabular}{lcc}
     \toprule
-    Atividade & \placeholder{modelo 1} & \placeholder{modelo 2} \\
+    Atividade & Qwen2.5-Coder 7B & Llama 3.1 8B \\
     \midrule
-    A1    & -- & -- \\
-    A2    & -- & -- \\
-    A3    & -- & -- \\
-    A4    & -- & -- \\
-    A5    & -- & -- \\
-    A6    & -- & -- \\
-    A7    & -- & -- \\
-    A8    & -- & -- \\
-    A9    & -- & -- \\
-    A10   & -- & -- \\
+    A1    & 5,8 $\pm$ 2,4 & 5,7 $\pm$ 2,5 \\
+    A2    & 8,5 $\pm$ 0,8 & 9,9 $\pm$ 0,5 \\
+    A3    & 7,5 $\pm$ 0,1 & 7,7 $\pm$ 0,8 \\
+    A4    & 14,0 $\pm$ 1,5 & 8,2 $\pm$ 2,1 \\
+    A5    & 12,9 $\pm$ 4,9 & 8,7 $\pm$ 4,2 \\
+    A6    & 21,9 $\pm$ 2,0 & 14,8 $\pm$ 1,2 \\
+    A7    & 13,8 $\pm$ 1,5 & 14,1 $\pm$ 0,7 \\
+    A8    & 9,4 $\pm$ 0,6 & 9,2 $\pm$ 1,1 \\
+    A9    & 24,2 $\pm$ 3,6 & 20,9 $\pm$ 5,2 \\
+    A10   & 23,9 $\pm$ 2,8 & 14,7 $\pm$ 1,3 \\
     \midrule
-    Média & -- & -- \\
+    Média & 14,2 $\pm$ 6,9 & 11,4 $\pm$ 4,9 \\
     \bottomrule
   \end{tabular}
   \fonte{elaborado pelo autor.}
 \end{table}
 
-\placeholder{Discutir a tabela: tempo médio de cada modelo; relação entre o tempo e o tamanho do código gerado; custo da primeira requisição, que inclui o carregamento do modelo em memória; e se o tempo observado é compatível com o uso durante uma aula}
+O Qwen2.5-Coder levou em média 14,2~s por resposta, e o Llama 3.1, 11,4~s. A diferença não decorre da velocidade de geração, próxima nos dois modelos, de cerca de 21 e 20 \textit{tokens} por segundo, mas do tamanho das respostas: o Qwen2.5-Coder produziu em média 295 \textit{tokens} por resposta, contra 222 do Llama 3.1, com códigos de 31 linhas em média, contra 26. Como o tempo acompanhou de forma praticamente linear a quantidade de \textit{tokens} gerados, ele cresceu com a complexidade das atividades. No Qwen2.5-Coder, a média passou de 7,3~s nas atividades de complexidade baixa para 15,6~s nas de complexidade média e 19,2~s nas de complexidade alta; no Llama 3.1, de 7,8~s para 11,4~s e 15,0~s. As atividades mais demoradas foram a A6, a A9 e a A10, que combinam sensor, \textit{display} ou servidor \textit{web} e resultam em códigos mais extensos.
+
+A requisição de aquecimento que antecedeu a série de cada modelo deixou o modelo carregado em memória, de modo que o carregamento não pesou nas gerações medidas: o maior tempo de carga registrado entre elas foi de 12~ms. O custo aparece na primeira requisição após a inicialização do servidor ou após 30 minutos sem uso: na conversa da \autoref{fig:interface-conversation}, 13,6~s dos 24,1~s da primeira resposta foram de carregamento. Com respostas entre 4 e 28~s, o tempo observado é compatível com o uso durante uma aula quando poucos estudantes fazem pedidos ao mesmo tempo. Nessa configuração, o Ollama processa uma requisição por vez, e pedidos simultâneos entram em fila, de modo que a espera de cada estudante cresce com o número de pedidos à sua frente.
 
 \subsection{Discussão}
 \label{subsec:results-discussion}
@@ -220,6 +221,6 @@ Os resultados permitem responder à pergunta central deste trabalho: se um model
 
 Frente aos demais trabalhos comparados no \autoref{qua:related-work}, a contribuição é de outra natureza. \citeonline{duarte2024} e \citeonline{souza2014} reduzem o custo do recurso didático, e \citeonline{parreira2021} remove a necessidade do dispositivo físico; nenhum deles atua sobre a etapa de escrita do código, que é justamente onde a plataforma proposta intervém. Os dois conjuntos de resultados são, portanto, complementares: a plataforma pode ser aplicada sobre qualquer um desses recursos didáticos, desde que exista um perfil de \textit{hardware} correspondente.
 
-Do ponto de vista de redes, a operação integralmente em rede local mostrou-se \placeholder{comentar a estabilidade da comunicação entre navegador, API e Ollama, e se a rede local representou algum gargalo frente ao tempo de inferência do modelo}. Esse é o compromisso central discutido na \autoref{sec:llm}: troca-se o acesso a modelos maiores pela independência de conexão externa, pela ausência de custo por requisição e pela permanência dos dados na instituição.
+Do ponto de vista de redes, a operação integralmente local mostrou-se estável: as 60 gerações e as requisições da verificação foram atendidas sem nenhuma falha de comunicação entre navegador, API e Ollama. A comunicação também não representou gargalo. A diferença entre o tempo medido pelo navegador e o tempo de inferência registrado pela API, que reúne a troca HTTP, a separação da resposta e a gravação da conversa, ficou entre 5 e 10~ms, e cada resposta ocupou no máximo 4,3~kB, frente a segundos de inferência. Como o navegador executou no próprio servidor, essa medida não inclui o meio físico da rede; ainda assim, mensagens desse tamanho acrescentariam tempo desprezível em uma rede local comum. Esse é o compromisso central discutido na \autoref{sec:llm}: troca-se o acesso a modelos maiores pela independência de conexão externa, pela ausência de custo por requisição e pela permanência dos dados na instituição.
 
 Três limitações devem ser consideradas na leitura destes resultados. A primeira é o tamanho da amostra: dez atividades com três gerações cada oferecem indicação de tendência, não significância estatística. A segunda é que a avaliação do comportamento do código foi feita pelo autor, e não por estudantes, de modo que a clareza das explicações geradas não foi medida junto ao público-alvo. A terceira é que os tempos dependem do servidor utilizado, descrito na \autoref{sec:method-evaluation}, e não se transferem diretamente para outras configurações.
