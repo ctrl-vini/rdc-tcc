@@ -144,7 +144,7 @@ O exemplo também expõe um erro do modelo. As observações do perfil indicam o
 \section{Avaliação da plataforma}
 \label{sec:results-evaluation}
 
-As dez atividades do \autoref{qua:activities} foram submetidas três vezes a cada modelo, conforme o procedimento da \autoref{sec:method-evaluation}, totalizando 60 gerações de código: 30 por modelo, das quais 15 no ESP32 e 15 no Arduino Mega 2560. \placeholder{Confirmar após as gerações do Llama 3.1 no Mega:} todas as respostas trouxeram um bloco de código.
+As dez atividades do \autoref{qua:activities} foram submetidas três vezes a cada modelo, conforme o procedimento da \autoref{sec:method-evaluation}, totalizando 60 gerações de código: 30 por modelo, das quais 15 no ESP32 e 15 no Arduino Mega 2560. Todas as respostas trouxeram um bloco de código.
 
 \subsection{Taxa de códigos funcionais}
 \label{subsec:results-functional}
@@ -167,7 +167,7 @@ A \autoref{tab:functional-rate} apresenta, para cada atividade, a placa em que f
     A4    & Mega 2560 & 3 & 0 & -- & -- \\
     A5    & Mega 2560 & 3 & 0 & -- & -- \\
     A6    & ESP32     & -- & -- & -- & -- \\
-    A7    & Mega 2560 & 1 & -- & -- & -- \\
+    A7    & Mega 2560 & 1 & 0 & -- & -- \\
     A8    & ESP32     & -- & -- & -- & -- \\
     A9    & ESP32     & -- & -- & -- & -- \\
     A10   & ESP32     & -- & -- & -- & -- \\
@@ -182,7 +182,9 @@ No Arduino Mega 2560, as 12 gerações do Qwen2.5-Coder nas atividades A1, A3, A
 
 Na A7, apenas uma das três gerações do Qwen2.5-Coder funcionou na primeira resposta. As outras duas compilaram, mas não dividiram corretamente o curso do potenciômetro. Em uma delas, a faixa foi calculada com a função \texttt{map}, convertendo a leitura de 0 a 1023 para um valor de 0 a 2; como o cálculo é feito com números inteiros, o resultado só chega a 2 no valor máximo da leitura. Na prática, o LED verde acendia na primeira metade do curso, o amarelo na segunda e o vermelho apenas no fim exato, o que resultou em duas faixas em vez de três. Na outra, a faixa foi obtida dividindo a leitura por 333; para leituras de 999 a 1023, o resultado é 3, valor que o código não associa a nenhum LED, e os três se apagavam no fim do curso. Os dois erros estão no tratamento dos limites da escala de 10 bits e foram classificados como comportamento diferente do pedido.
 
-\placeholder{Completar com o refinamento das duas gerações da A7 que falharam, com o Llama 3.1 no Mega e com as duas séries no ESP32: taxa global de cada modelo; se a taxa cai com a complexidade das atividades; quais atividades concentraram as falhas; que tipo de erro apareceu; e quanto o refinamento recuperou}
+Nenhuma das duas foi recuperada nas duas rodadas de refinamento previstas. Na geração que dividia a leitura por 333, o modelo manteve a mesma divisão em todas as respostas seguintes e, em uma delas, moveu a leitura do potenciômetro para a função \texttt{setup}, de modo que o código deixou de responder ao potenciômetro; mesmo com mais mensagens do que as duas rodadas previstas, os LEDs continuaram apagando no fim do curso. Na geração que usava a função \texttt{map}, a primeira rodada recebeu por engano a descrição do defeito da outra geração. Nas rodadas seguintes, já com a descrição correta, o modelo manteve a função \texttt{map} e alterou apenas o acionamento dos LEDs, chegando a afirmar na explicação que as faixas estavam divididas igualmente. Uma divisão correta só apareceu na sexta mensagem, depois que o próprio pedido apontou a função \texttt{map} como causa do problema, o que exige do estudante justamente o diagnóstico que se esperava da plataforma. Os dois casos indicam a dificuldade do modelo em corrigir um erro de lógica a partir apenas da descrição do comportamento observado.
+
+\placeholder{Completar após os testes na bancada do Llama 3.1 no Mega e das duas séries no ESP32: taxa global de cada modelo; se a taxa cai com a complexidade das atividades; quais atividades concentraram as falhas; que tipo de erro apareceu; e quanto o refinamento recuperou}
 
 \subsection{Tempo de resposta}
 \label{subsec:results-time}
@@ -197,24 +199,26 @@ A \autoref{tab:response-time} apresenta o tempo de resposta do modelo por ativid
     \toprule
     Atividade & Placa & Qwen2.5-Coder 7B & Llama 3.1 8B \\
     \midrule
-    A1    & Mega 2560 & 5,8 $\pm$ 2,2 & -- \\
+    A1    & Mega 2560 & 5,8 $\pm$ 2,2 & 6,7 $\pm$ 1,2 \\
     A2    & ESP32     & 8,5 $\pm$ 0,8 & 9,9 $\pm$ 0,5 \\
-    A3    & Mega 2560 & 8,3 $\pm$ 2,7 & -- \\
-    A4    & Mega 2560 & 13,0 $\pm$ 1,7 & -- \\
-    A5    & Mega 2560 & 11,3 $\pm$ 1,4 & -- \\
+    A3    & Mega 2560 & 8,3 $\pm$ 2,7 & 7,8 $\pm$ 0,2 \\
+    A4    & Mega 2560 & 13,0 $\pm$ 1,7 & 14,0 $\pm$ 3,3 \\
+    A5    & Mega 2560 & 11,3 $\pm$ 1,4 & 8,5 $\pm$ 3,8 \\
     A6    & ESP32     & 21,9 $\pm$ 2,0 & 14,8 $\pm$ 1,2 \\
-    A7    & Mega 2560 & 12,3 $\pm$ 2,4 & -- \\
+    A7    & Mega 2560 & 12,3 $\pm$ 2,4 & 16,1 $\pm$ 1,4 \\
     A8    & ESP32     & 9,4 $\pm$ 0,6 & 9,2 $\pm$ 1,1 \\
     A9    & ESP32     & 24,2 $\pm$ 3,6 & 20,9 $\pm$ 5,2 \\
     A10   & ESP32     & 23,9 $\pm$ 2,8 & 14,7 $\pm$ 1,3 \\
     \midrule
-    Média &           & 13,9 $\pm$ 6,9 & -- \\
+    Média &           & 13,9 $\pm$ 6,9 & 12,3 $\pm$ 4,8 \\
     \bottomrule
   \end{tabular}
   \fonte{elaborado pelo autor.}
 \end{table}
 
-Nas 30 gerações do Qwen2.5-Coder, o tempo médio de resposta foi de 13,9~s, entre 3,4 e 27,8~s. O tempo acompanhou de forma praticamente linear a quantidade de \textit{tokens} gerados, a cerca de 21 \textit{tokens} por segundo, e por isso cresceu com o tamanho do código. As atividades mais demoradas foram a A6, a A9 e a A10, executadas no ESP32, que combinam sensor, \textit{display} ou servidor \textit{web} e resultam nos códigos mais extensos; as mais rápidas foram as de complexidade baixa no Mega, como a A1, com menos de 6~s em média. \placeholder{Comparar com o Llama 3.1 após as gerações no Mega: tempo médio, velocidade de geração e tamanho das respostas}
+Nas 30 gerações do Qwen2.5-Coder, o tempo médio de resposta foi de 13,9~s, entre 3,4 e 27,8~s. O tempo acompanhou de forma praticamente linear a quantidade de \textit{tokens} gerados, a cerca de 21 \textit{tokens} por segundo, e por isso cresceu com o tamanho do código. As atividades mais demoradas foram a A6, a A9 e a A10, executadas no ESP32, que combinam sensor, \textit{display} ou servidor \textit{web} e resultam nos códigos mais extensos; as mais rápidas foram as de complexidade baixa no Mega, como a A1, com menos de 6~s em média.
+
+No Llama 3.1, o tempo médio foi de 12,3~s, entre 5,6 e 26,5~s, a cerca de 19,5 \textit{tokens} por segundo. A geração foi um pouco mais lenta por \textit{token} que a do Qwen2.5-Coder, mas as respostas foram mais curtas, com 239 \textit{tokens} em média contra 291, e o tempo médio ficou 1,6~s abaixo. A diferença concentrou-se no ESP32, sobretudo nas atividades A6 e A10, em que o Llama produziu códigos mais curtos; no Mega, as médias dos dois modelos foram próximas, de 10,2~s no Qwen2.5-Coder e 10,6~s no Llama. Em ambos os modelos, o tempo cresceu com a complexidade das atividades, mas a diferença entre eles ficou em poucos segundos, o que não altera a experiência de uso.
 
 A requisição de aquecimento que antecedeu a série de cada modelo deixou o modelo carregado em memória, de modo que o carregamento não pesou nas gerações medidas: o tempo de carga registrado nelas não passou de poucos milissegundos. O custo aparece na primeira requisição após a inicialização do servidor ou após 30 minutos sem uso: na conversa da \autoref{fig:interface-conversation}, 13,6~s dos 24,1~s da primeira resposta foram de carregamento. Com respostas entre 3 e 28~s, o tempo observado é compatível com o uso durante uma aula quando poucos estudantes fazem pedidos ao mesmo tempo. Nessa configuração, o Ollama processa uma requisição por vez, e pedidos simultâneos entram em fila, de modo que a espera de cada estudante cresce com o número de pedidos à sua frente.
 
