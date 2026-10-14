@@ -161,13 +161,13 @@ A \autoref{tab:functional-rate} apresenta, para cada atividade, a placa em que f
     \cmidrule(lr){3-4} \cmidrule(lr){5-6}
     Atividade & Placa & 1.\textsuperscript{a} geração & Após refino & 1.\textsuperscript{a} geração & Após refino \\
     \midrule
-    A1    & Mega 2560 & 3 & 0 & -- & -- \\
+    A1    & Mega 2560 & 3 & 0 & 3 & 0 \\
     A2    & ESP32     & -- & -- & -- & -- \\
-    A3    & Mega 2560 & 3 & 0 & -- & -- \\
-    A4    & Mega 2560 & 3 & 0 & -- & -- \\
-    A5    & Mega 2560 & 3 & 0 & -- & -- \\
+    A3    & Mega 2560 & 3 & 0 & 3 & 0 \\
+    A4    & Mega 2560 & 3 & 0 & 3 & 0 \\
+    A5    & Mega 2560 & 3 & 0 & 1 & 0 \\
     A6    & ESP32     & -- & -- & -- & -- \\
-    A7    & Mega 2560 & 1 & 0 & -- & -- \\
+    A7    & Mega 2560 & 1 & 0 & 3 & 0 \\
     A8    & ESP32     & -- & -- & -- & -- \\
     A9    & ESP32     & -- & -- & -- & -- \\
     A10   & ESP32     & -- & -- & -- & -- \\
@@ -184,7 +184,13 @@ Na A7, apenas uma das três gerações do Qwen2.5-Coder funcionou na primeira re
 
 Nenhuma das duas foi recuperada nas duas rodadas de refinamento previstas. Na geração que dividia a leitura por 333, o modelo manteve a mesma divisão em todas as respostas seguintes e, em uma delas, moveu a leitura do potenciômetro para a função \texttt{setup}, de modo que o código deixou de responder ao potenciômetro; mesmo com mais mensagens do que as duas rodadas previstas, os LEDs continuaram apagando no fim do curso. Na geração que usava a função \texttt{map}, a primeira rodada recebeu por engano a descrição do defeito da outra geração. Nas rodadas seguintes, já com a descrição correta, o modelo manteve a função \texttt{map} e alterou apenas o acionamento dos LEDs, chegando a afirmar na explicação que as faixas estavam divididas igualmente. Uma divisão correta só apareceu na sexta mensagem, depois que o próprio pedido apontou a função \texttt{map} como causa do problema, o que exige do estudante justamente o diagnóstico que se esperava da plataforma. Os dois casos indicam a dificuldade do modelo em corrigir um erro de lógica a partir apenas da descrição do comportamento observado.
 
-\placeholder{Completar após os testes na bancada do Llama 3.1 no Mega e das duas séries no ESP32: taxa global de cada modelo; se a taxa cai com a complexidade das atividades; quais atividades concentraram as falhas; que tipo de erro apareceu; e quanto o refinamento recuperou}
+No Llama 3.1, 13 das 15 gerações no Mega funcionaram na primeira resposta, o mesmo total do Qwen2.5-Coder, mas as falhas ficaram em outra atividade. As gerações da A1, da A3 e da A4 funcionaram todas, igualmente com os pinos do perfil. Na A7, as três gerações funcionaram: em vez de calcular a faixa com a função \texttt{map} ou com uma divisão, o modelo comparou a leitura com dois limites fixos, 340 e 680, o que cobre toda a escala de 0 a 1023 e evita o problema dos limites observado no Qwen2.5-Coder.
+
+As duas falhas do Llama 3.1 ocorreram na A5. Em duas gerações, o objeto do sensor foi criado sem a chamada a \texttt{dht.begin()}, que inicializa o sensor, e o monitor serial exibiu \texttt{nan} no lugar da temperatura. Nenhuma delas foi recuperada nas duas rodadas previstas. Em uma, as respostas seguintes recorreram a métodos que não existem na biblioteca, como \texttt{available} e \texttt{isValidRead}, e declararam o sensor dentro da função \texttt{setup}, fora do alcance da função \texttt{loop}; mesmo com mais de dez mensagens de correção, incluindo pedidos para voltar à primeira versão, o modelo não chegou a um código que compilasse. Na outra, a primeira rodada usou \texttt{dht.begin()} como condição de um \texttt{if}, embora a função não retorne valor, e a segunda removeu do construtor o tipo do sensor, de modo que as duas respostas deixaram de compilar; o código correto só veio na terceira rodada, fora do limite, e a geração foi contada como falha. A geração restante inicializou o sensor corretamente, mas acrescentou, sem que o pedido o mencionasse, a exibição da temperatura no \textit{display} OLED descrito no perfil. A compilação falhou porque a biblioteca do \textit{display}, prevista no perfil, não estava instalada na IDE, o mesmo problema de preparação do ambiente relatado para o Qwen2.5-Coder; instalada a biblioteca, o código original mostrou a temperatura no monitor serial, como pedido, e foi contado como funcional na primeira resposta.
+
+No Mega, portanto, cada modelo produziu 13 códigos funcionais em 15 gerações, nenhum deles obtido por refinamento. As falhas, porém, não coincidiram: o Qwen2.5-Coder errou no tratamento dos limites da escala do potenciômetro, que o Llama 3.1 resolveu nas três gerações, e o Llama 3.1 errou na inicialização do sensor, que o Qwen2.5-Coder fez corretamente em todas. Nos dois modelos, as respostas de correção tenderam a manter o erro original ou a introduzir erros novos, como métodos inexistentes na biblioteca, em vez de corrigir o defeito descrito.
+
+\placeholder{Completar após os testes na bancada das duas séries no ESP32: taxa global de cada modelo; se a taxa cai com a complexidade das atividades; quais atividades concentraram as falhas; que tipo de erro apareceu; e quanto o refinamento recuperou}
 
 \subsection{Tempo de resposta}
 \label{subsec:results-time}
