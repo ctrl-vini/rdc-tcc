@@ -2,10 +2,12 @@
 
 \begin{apendicesenv}
 
-\chapter{Descrição do \textit{hardware} da placa}
+\chapter{Descrição do \textit{hardware} das placas}
 \label{app:hardware-profile}
 
-Este apêndice apresenta o perfil de \textit{hardware} do ESP32 DevKit V1 na forma em que é enviado ao modelo, dentro da mensagem de sistema de cada requisição. O arquivo completo do perfil contém ainda a disposição dos pinos na placa, a placa a selecionar na Arduino IDE e as instruções de ligação de cada componente, informações usadas apenas pela interface e omitidas do \textit{prompt}. O perfil é enviado ao modelo em uma única linha; as quebras de linha abaixo foram acrescentadas para facilitar a leitura.
+Este apêndice apresenta os perfis de \textit{hardware} do ESP32 DevKit V1 e do Arduino Mega 2560 na forma em que são enviados ao modelo, dentro da mensagem de sistema de cada requisição. O arquivo completo de cada perfil contém ainda a disposição dos pinos na placa, a placa a selecionar na Arduino IDE e as instruções de ligação de cada componente, informações usadas apenas pela interface e omitidas do \textit{prompt}. Cada perfil é enviado ao modelo em uma única linha; as quebras de linha abaixo foram acrescentadas para facilitar a leitura. No Mega, o número de um pino é o usado no código, de modo que o 54 corresponde à entrada analógica A0.
+
+\section{ESP32 DevKit V1}
 
 \begin{lstlisting}
 {
@@ -44,6 +46,51 @@ Este apêndice apresenta o perfil de \textit{hardware} do ESP32 DevKit V1 na for
     "Use a biblioteca DHT sensor library, da Adafruit, para o DHT22: crie o sensor com DHT dht(pino, DHT22), e readTemperature() já devolve graus Celsius.",
     "Para PWM, use analogWrite(pino, valor); para o buzzer, tone(pino, frequência) e noTone(pino). Não use ledcSetup nem ledcAttachPin, que não existem no núcleo ESP32 3.x.",
     "O monitor serial usa 115200 baud."
+  ]
+}
+\end{lstlisting}
+
+\section{Arduino Mega 2560}
+
+\begin{lstlisting}
+{
+  "id": "arduino-mega-2560",
+  "name": "Arduino Mega 2560",
+  "microcontroller": "ATmega2560 (8 bits, 16 MHz, 8 KB de RAM)",
+  "language": "C++",
+  "framework": "Arduino (núcleo AVR)",
+  "components": [
+    {"name": "LED embutido", "type": "saída digital",
+     "pins": [{"gpio": 13, "role": null}]},
+    {"name": "LED verde", "type": "saída digital",
+     "pins": [{"gpio": 5, "role": null}]},
+    {"name": "LED amarelo", "type": "saída digital",
+     "pins": [{"gpio": 6, "role": null}]},
+    {"name": "LED vermelho", "type": "saída digital",
+     "pins": [{"gpio": 9, "role": null}]},
+    {"name": "Botão", "type": "entrada digital com pull-up interno",
+     "pins": [{"gpio": 2, "role": null}]},
+    {"name": "Buzzer", "type": "buzzer passivo, tocado com tone()",
+     "pins": [{"gpio": 8, "role": null}]},
+    {"name": "Sensor DHT22", "type": "sensor de temperatura e umidade, digital de um fio",
+     "pins": [{"gpio": 7, "role": null}]},
+    {"name": "Potenciômetro", "type": "entrada analógica (ADC de 10 bits, 0 a 1023)",
+     "pins": [{"gpio": 54, "role": null}]},
+    {"name": "Display OLED", "type": "SSD1306 128x64, I2C, endereço 0x3C",
+     "pins": [{"gpio": 20, "role": "SDA"}, {"gpio": 21, "role": "SCL"}]},
+    {"name": "Relé", "type": "módulo relé de 5 V, saída digital ativa em nível alto",
+     "pins": [{"gpio": 4, "role": null}]}
+  ],
+  "notes": [
+    "Os pinos digitais funcionam em 5 V e fornecem até 20 mA cada.",
+    "PWM (analogWrite) nos pinos 2 a 13 e 44 a 46.",
+    "As entradas analógicas A0 a A15 leem de 0 a 1023 (10 bits, com referência de 5 V).",
+    "O I2C fica fixo nos pinos 20 (SDA) e 21 (SCL): inicie com Wire.begin(), sem argumentos.",
+    "Os pinos 0 e 1 são a serial do USB, usada por Serial; não ligue componentes neles. A placa tem também Serial1 (pinos 18 e 19), Serial2 (16 e 17) e Serial3 (14 e 15).",
+    "Use a biblioteca DHT sensor library, da Adafruit, para o DHT22: crie o sensor com DHT dht(pino, DHT22), e readTemperature() já devolve graus Celsius.",
+    "Use as bibliotecas Adafruit SSD1306 e Adafruit GFX para o display.",
+    "O monitor serial usa 9600 baud.",
+    "Se o estudante pedir para trocar um componente de pino, mantenha o nome da constante e use um pino livre: D3, D10 a D12, D22 a D53 (no conector duplo) ou A1 a A15."
   ]
 }
 \end{lstlisting}

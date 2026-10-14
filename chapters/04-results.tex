@@ -144,41 +144,43 @@ O exemplo também expõe um erro do modelo. As observações do perfil indicam o
 \section{Avaliação da plataforma}
 \label{sec:results-evaluation}
 
-As dez atividades do \autoref{qua:activities} foram submetidas três vezes a cada modelo, conforme o procedimento da \autoref{sec:method-evaluation}, totalizando 60 gerações de código, 30 por modelo. Todas as respostas trouxeram um bloco de código.
+As dez atividades do \autoref{qua:activities} foram submetidas três vezes a cada modelo, conforme o procedimento da \autoref{sec:method-evaluation}, totalizando 60 gerações de código: 30 por modelo, das quais 15 no ESP32 e 15 no Arduino Mega 2560. \placeholder{Confirmar após as gerações do Llama 3.1 no Mega:} todas as respostas trouxeram um bloco de código.
 
 \subsection{Taxa de códigos funcionais}
 \label{subsec:results-functional}
 
-A \autoref{tab:functional-rate} apresenta, para cada atividade, quantas das três gerações produziram código funcional já na primeira resposta e quantas passaram a funcionar após as rodadas de refinamento.
+A \autoref{tab:functional-rate} apresenta, para cada atividade, a placa em que foi executada, quantas das três gerações produziram código funcional já na primeira resposta e quantas passaram a funcionar após as rodadas de refinamento.
 
 \begin{table}[!htb]
   \centering
   \caption{Códigos funcionais por atividade, em três gerações por modelo}
   \label{tab:functional-rate}
-  \begin{tabular}{lcccc}
+  \begin{tabular}{llcccc}
     \toprule
-    & \multicolumn{2}{c}{Qwen2.5-Coder 7B} & \multicolumn{2}{c}{Llama 3.1 8B} \\
-    \cmidrule(lr){2-3} \cmidrule(lr){4-5}
-    Atividade & 1.\textsuperscript{a} geração & Após refino & 1.\textsuperscript{a} geração & Após refino \\
+    & & \multicolumn{2}{c}{Qwen2.5-Coder 7B} & \multicolumn{2}{c}{Llama 3.1 8B} \\
+    \cmidrule(lr){3-4} \cmidrule(lr){5-6}
+    Atividade & Placa & 1.\textsuperscript{a} geração & Após refino & 1.\textsuperscript{a} geração & Após refino \\
     \midrule
-    A1    & -- & -- & -- & -- \\
-    A2    & -- & -- & -- & -- \\
-    A3    & -- & -- & -- & -- \\
-    A4    & -- & -- & -- & -- \\
-    A5    & -- & -- & -- & -- \\
-    A6    & -- & -- & -- & -- \\
-    A7    & -- & -- & -- & -- \\
-    A8    & -- & -- & -- & -- \\
-    A9    & -- & -- & -- & -- \\
-    A10   & -- & -- & -- & -- \\
+    A1    & Mega 2560 & 3 & 0 & -- & -- \\
+    A2    & ESP32     & -- & -- & -- & -- \\
+    A3    & Mega 2560 & 3 & 0 & -- & -- \\
+    A4    & Mega 2560 & 3 & 0 & -- & -- \\
+    A5    & Mega 2560 & 3 & 0 & -- & -- \\
+    A6    & ESP32     & -- & -- & -- & -- \\
+    A7    & Mega 2560 & -- & -- & -- & -- \\
+    A8    & ESP32     & -- & -- & -- & -- \\
+    A9    & ESP32     & -- & -- & -- & -- \\
+    A10   & ESP32     & -- & -- & -- & -- \\
     \midrule
-    Total & -- & -- & -- & -- \\
+    Total &           & -- & -- & -- & -- \\
     \bottomrule
   \end{tabular}
   \fonte{elaborado pelo autor.}
 \end{table}
 
-\placeholder{Discutir a tabela: taxa global de cada modelo; se a taxa cai com a complexidade das atividades; quais atividades concentraram as falhas; que tipo de erro apareceu (pino trocado, biblioteca inexistente, código que não compila, comportamento diferente do pedido); e quanto o refinamento recuperou}
+No Arduino Mega 2560, as 12 gerações do Qwen2.5-Coder nas atividades A1, A3, A4 e A5 funcionaram já na primeira resposta. Os códigos usaram os pinos que o perfil atribui a cada componente nessa placa, diferentes dos usados no ESP32, e a velocidade de 9600 baud que as observações do perfil indicam para o monitor serial. Em uma das gerações da A5, a primeira compilação falhou porque a biblioteca do DHT22 ainda não estava instalada na IDE, em desacordo com o procedimento da \autoref{sec:method-evaluation}. Ao receber a mensagem de erro, o modelo não gerou código novo e indicou a instalação da biblioteca; instalada a biblioteca, o código original funcionou. Por se tratar de falha na preparação do ambiente, e não no código gerado, essa geração foi contada como funcional na primeira resposta.
+
+\placeholder{Completar com a A7 do Qwen2.5-Coder no Mega, com o Llama 3.1 no Mega e com as duas séries no ESP32: taxa global de cada modelo; se a taxa cai com a complexidade das atividades; quais atividades concentraram as falhas; que tipo de erro apareceu; e quanto o refinamento recuperou}
 
 \subsection{Tempo de resposta}
 \label{subsec:results-time}
@@ -189,30 +191,30 @@ A \autoref{tab:response-time} apresenta o tempo de resposta do modelo por ativid
   \centering
   \caption{Tempo de resposta por atividade, em segundos}
   \label{tab:response-time}
-  \begin{tabular}{lcc}
+  \begin{tabular}{llcc}
     \toprule
-    Atividade & Qwen2.5-Coder 7B & Llama 3.1 8B \\
+    Atividade & Placa & Qwen2.5-Coder 7B & Llama 3.1 8B \\
     \midrule
-    A1    & 5,8 $\pm$ 2,4 & 5,7 $\pm$ 2,5 \\
-    A2    & 8,5 $\pm$ 0,8 & 9,9 $\pm$ 0,5 \\
-    A3    & 7,5 $\pm$ 0,1 & 7,7 $\pm$ 0,8 \\
-    A4    & 14,0 $\pm$ 1,5 & 8,2 $\pm$ 2,1 \\
-    A5    & 12,9 $\pm$ 4,9 & 8,7 $\pm$ 4,2 \\
-    A6    & 21,9 $\pm$ 2,0 & 14,8 $\pm$ 1,2 \\
-    A7    & 13,8 $\pm$ 1,5 & 14,1 $\pm$ 0,7 \\
-    A8    & 9,4 $\pm$ 0,6 & 9,2 $\pm$ 1,1 \\
-    A9    & 24,2 $\pm$ 3,6 & 20,9 $\pm$ 5,2 \\
-    A10   & 23,9 $\pm$ 2,8 & 14,7 $\pm$ 1,3 \\
+    A1    & Mega 2560 & 5,8 $\pm$ 2,2 & -- \\
+    A2    & ESP32     & 8,5 $\pm$ 0,8 & 9,9 $\pm$ 0,5 \\
+    A3    & Mega 2560 & 8,3 $\pm$ 2,7 & -- \\
+    A4    & Mega 2560 & 13,0 $\pm$ 1,7 & -- \\
+    A5    & Mega 2560 & 11,3 $\pm$ 1,4 & -- \\
+    A6    & ESP32     & 21,9 $\pm$ 2,0 & 14,8 $\pm$ 1,2 \\
+    A7    & Mega 2560 & 12,3 $\pm$ 2,4 & -- \\
+    A8    & ESP32     & 9,4 $\pm$ 0,6 & 9,2 $\pm$ 1,1 \\
+    A9    & ESP32     & 24,2 $\pm$ 3,6 & 20,9 $\pm$ 5,2 \\
+    A10   & ESP32     & 23,9 $\pm$ 2,8 & 14,7 $\pm$ 1,3 \\
     \midrule
-    Média & 14,2 $\pm$ 6,9 & 11,4 $\pm$ 4,9 \\
+    Média &           & 13,9 $\pm$ 6,9 & -- \\
     \bottomrule
   \end{tabular}
   \fonte{elaborado pelo autor.}
 \end{table}
 
-O Qwen2.5-Coder levou em média 14,2~s por resposta, e o Llama 3.1, 11,4~s. A diferença não decorre da velocidade de geração, próxima nos dois modelos, de cerca de 21 e 20 \textit{tokens} por segundo, mas do tamanho das respostas: o Qwen2.5-Coder produziu em média 295 \textit{tokens} por resposta, contra 222 do Llama 3.1, com códigos de 31 linhas em média, contra 26. Como o tempo acompanhou de forma praticamente linear a quantidade de \textit{tokens} gerados, ele cresceu com a complexidade das atividades. No Qwen2.5-Coder, a média passou de 7,3~s nas atividades de complexidade baixa para 15,6~s nas de complexidade média e 19,2~s nas de complexidade alta; no Llama 3.1, de 7,8~s para 11,4~s e 15,0~s. As atividades mais demoradas foram a A6, a A9 e a A10, que combinam sensor, \textit{display} ou servidor \textit{web} e resultam em códigos mais extensos.
+Nas 30 gerações do Qwen2.5-Coder, o tempo médio de resposta foi de 13,9~s, entre 3,4 e 27,8~s. O tempo acompanhou de forma praticamente linear a quantidade de \textit{tokens} gerados, a cerca de 21 \textit{tokens} por segundo, e por isso cresceu com o tamanho do código. As atividades mais demoradas foram a A6, a A9 e a A10, executadas no ESP32, que combinam sensor, \textit{display} ou servidor \textit{web} e resultam nos códigos mais extensos; as mais rápidas foram as de complexidade baixa no Mega, como a A1, com menos de 6~s em média. \placeholder{Comparar com o Llama 3.1 após as gerações no Mega: tempo médio, velocidade de geração e tamanho das respostas}
 
-A requisição de aquecimento que antecedeu a série de cada modelo deixou o modelo carregado em memória, de modo que o carregamento não pesou nas gerações medidas: o maior tempo de carga registrado entre elas foi de 12~ms. O custo aparece na primeira requisição após a inicialização do servidor ou após 30 minutos sem uso: na conversa da \autoref{fig:interface-conversation}, 13,6~s dos 24,1~s da primeira resposta foram de carregamento. Com respostas entre 4 e 28~s, o tempo observado é compatível com o uso durante uma aula quando poucos estudantes fazem pedidos ao mesmo tempo. Nessa configuração, o Ollama processa uma requisição por vez, e pedidos simultâneos entram em fila, de modo que a espera de cada estudante cresce com o número de pedidos à sua frente.
+A requisição de aquecimento que antecedeu a série de cada modelo deixou o modelo carregado em memória, de modo que o carregamento não pesou nas gerações medidas: o tempo de carga registrado nelas não passou de poucos milissegundos. O custo aparece na primeira requisição após a inicialização do servidor ou após 30 minutos sem uso: na conversa da \autoref{fig:interface-conversation}, 13,6~s dos 24,1~s da primeira resposta foram de carregamento. Com respostas entre 3 e 28~s, o tempo observado é compatível com o uso durante uma aula quando poucos estudantes fazem pedidos ao mesmo tempo. Nessa configuração, o Ollama processa uma requisição por vez, e pedidos simultâneos entram em fila, de modo que a espera de cada estudante cresce com o número de pedidos à sua frente.
 
 \subsection{Discussão}
 \label{subsec:results-discussion}
@@ -221,6 +223,6 @@ Os resultados permitem responder à pergunta central deste trabalho: se um model
 
 Frente aos demais trabalhos comparados no \autoref{qua:related-work}, a contribuição é de outra natureza. \citeonline{duarte2024} e \citeonline{souza2014} reduzem o custo do recurso didático, e \citeonline{parreira2021} remove a necessidade do dispositivo físico; nenhum deles atua sobre a etapa de escrita do código, que é justamente onde a plataforma proposta intervém. Os dois conjuntos de resultados são, portanto, complementares: a plataforma pode ser aplicada sobre qualquer um desses recursos didáticos, desde que exista um perfil de \textit{hardware} correspondente.
 
-Do ponto de vista de redes, a operação integralmente local mostrou-se estável: as 60 gerações e as requisições da verificação foram atendidas sem nenhuma falha de comunicação entre navegador, API e Ollama. A comunicação também não representou gargalo. A diferença entre o tempo medido pelo navegador e o tempo de inferência registrado pela API, que reúne a troca HTTP, a separação da resposta e a gravação da conversa, ficou entre 5 e 10~ms, e cada resposta ocupou no máximo 4,3~kB, frente a segundos de inferência. Como o navegador executou no próprio servidor, essa medida não inclui o meio físico da rede; ainda assim, mensagens desse tamanho acrescentariam tempo desprezível em uma rede local comum. Esse é o compromisso central discutido na \autoref{sec:llm}: troca-se o acesso a modelos maiores pela independência de conexão externa, pela ausência de custo por requisição e pela permanência dos dados na instituição.
+Do ponto de vista de redes, a operação integralmente local mostrou-se estável: todas as gerações e as requisições da verificação foram atendidas sem nenhuma falha de comunicação entre navegador, API e Ollama. A comunicação também não representou gargalo. A diferença entre o tempo medido pelo navegador e o tempo de inferência registrado pela API, que reúne a troca HTTP, a separação da resposta e a gravação da conversa, ficou entre 4 e 10~ms, e cada resposta ocupou no máximo 4,4~kB, frente a segundos de inferência. Como o navegador executou no próprio servidor, essa medida não inclui o meio físico da rede; ainda assim, mensagens desse tamanho acrescentariam tempo desprezível em uma rede local comum. Esse é o compromisso central discutido na \autoref{sec:llm}: troca-se o acesso a modelos maiores pela independência de conexão externa, pela ausência de custo por requisição e pela permanência dos dados na instituição.
 
-Três limitações devem ser consideradas na leitura destes resultados. A primeira é o tamanho da amostra: dez atividades com três gerações cada oferecem indicação de tendência, não significância estatística. A segunda é que a avaliação do comportamento do código foi feita pelo autor, e não por estudantes, de modo que a clareza das explicações geradas não foi medida junto ao público-alvo. A terceira é que os tempos dependem do servidor utilizado, descrito na \autoref{sec:method-evaluation}, e não se transferem diretamente para outras configurações.
+Três limitações devem ser consideradas na leitura destes resultados. A primeira é o tamanho da amostra: dez atividades com três gerações cada oferecem indicação de tendência, não significância estatística; e, como cada atividade foi executada em uma única placa, os resultados não permitem comparar as duas placas na mesma atividade. A segunda é que a avaliação do comportamento do código foi feita pelo autor, e não por estudantes, de modo que a clareza das explicações geradas não foi medida junto ao público-alvo. A terceira é que os tempos dependem do servidor utilizado, descrito na \autoref{sec:method-evaluation}, e não se transferem diretamente para outras configurações.

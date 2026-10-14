@@ -82,7 +82,7 @@ A API foi implementada em Python com o \textit{framework} FastAPI, executado pel
 
 O código foi organizado em camadas, cada uma com uma responsabilidade única. As rotas tratam apenas do protocolo HTTP: recebem a requisição, validam o corpo e devolvem a resposta. Os serviços concentram as regras da plataforma — carregar o perfil da placa, montar o \textit{prompt}, registrar o histórico, acionar o modelo e identificar os pinos usados pelo código gerado. O acesso ao modelo e o acesso aos arquivos das conversas ficam isolados em módulos próprios, de modo que nenhuma outra parte do código depende do Ollama ou da forma de armazenamento. Os esquemas descrevem os formatos de entrada e saída, e um módulo de configuração centraliza os parâmetros ajustáveis, lidos de variáveis de ambiente, entre eles o nome do modelo utilizado.
 
-Os perfis de \textit{hardware} são arquivos JSON armazenados em um diretório do servidor, um por placa, carregados na inicialização. Cada perfil declara o identificador e o nome da placa, o microcontrolador, a linguagem e o \textit{framework} de destino do código, a lista de componentes disponíveis com os respectivos pinos e tipo, e observações sobre restrições de uso e bibliotecas. O perfil pode declarar ainda a disposição dos pinos na placa e a forma de ligar cada componente, informações usadas apenas pela interface. Cadastrar uma nova placa consiste em acrescentar um arquivo ao diretório e reiniciar o servidor, sem alterar o código-fonte, conforme o RNF03. A plataforma acompanha perfis para o ESP32 DevKit V1 e para as placas Arduino UNO R3, UNO R4, Mega 2560 e Nano, todos com o mesmo conjunto de componentes: o LED embutido, três LEDs externos, um botão, um \textit{buzzer}, um sensor de temperatura e umidade DHT22, um potenciômetro, um \textit{display} I2C e um módulo relé. O ESP32 é a placa utilizada na avaliação, e o \autoref{app:hardware-profile} apresenta o seu perfil.
+Os perfis de \textit{hardware} são arquivos JSON armazenados em um diretório do servidor, um por placa, carregados na inicialização. Cada perfil declara o identificador e o nome da placa, o microcontrolador, a linguagem e o \textit{framework} de destino do código, a lista de componentes disponíveis com os respectivos pinos e tipo, e observações sobre restrições de uso e bibliotecas. O perfil pode declarar ainda a disposição dos pinos na placa e a forma de ligar cada componente, informações usadas apenas pela interface. Cadastrar uma nova placa consiste em acrescentar um arquivo ao diretório e reiniciar o servidor, sem alterar o código-fonte, conforme o RNF03. A plataforma acompanha perfis para o ESP32 DevKit V1 e para as placas Arduino UNO R3, UNO R4, Mega 2560 e Nano, todos com o mesmo conjunto de componentes: o LED embutido, três LEDs externos, um botão, um \textit{buzzer}, um sensor de temperatura e umidade DHT22, um potenciômetro, um \textit{display} I2C e um módulo relé. O ESP32 e o Arduino Mega 2560 são as placas utilizadas na avaliação, e o \autoref{app:hardware-profile} apresenta os seus perfis.
 
 A montagem do \textit{prompt} é feita pela API a cada requisição e resulta em uma lista de mensagens, enviadas ao modelo nesta ordem: uma mensagem de sistema, que define o papel do modelo e o formato esperado da resposta — um único bloco com o código-fonte completo, seguido de uma explicação curta em português — e traz o perfil de \textit{hardware} da placa selecionada, serializado em JSON; as mensagens anteriores da conversa, quando houver; e a descrição da atividade escrita pelo estudante. Do perfil, seguem para o modelo apenas os componentes, os pinos e as observações; a disposição dos pinos e as instruções de ligação, destinadas ao estudante, ficam de fora, o que reduz o tamanho do \textit{prompt}. A instrução de sistema pede também que cada pino seja declarado como uma constante nomeada, o que facilita a identificação dos pinos descrita adiante. O histórico de cada conversa é gravado em arquivo JSON, o que permite o refinamento previsto no RF05 e preserva o registro entre reinicializações do servidor.
 
@@ -106,44 +106,44 @@ Ao lado da conversa, um painel exibe o desenho da placa com a disposição dos p
 \section{Procedimento de avaliação}
 \label{sec:method-evaluation}
 
-A avaliação foi conduzida em ambiente controlado, com toda a plataforma em execução local. O servidor de testes é um Mac mini de 2024 com processador Apple M4 e 16~GB de memória unificada, que executa o Ollama e a API; o Ollama processa o modelo na unidade de processamento gráfico (GPU, do inglês \textit{Graphics Processing Unit}) integrada ao processador. O mesmo computador executa o navegador e a IDE, com o ESP32 conectado por USB. A configuração é relevante porque o tempo de resposta do modelo depende diretamente dela.
+A avaliação foi conduzida em ambiente controlado, com toda a plataforma em execução local. O servidor de testes é um Mac mini de 2024 com processador Apple M4 e 16~GB de memória unificada, que executa o Ollama e a API; o Ollama processa o modelo na unidade de processamento gráfico (GPU, do inglês \textit{Graphics Processing Unit}) integrada ao processador. O mesmo computador executa o navegador e a IDE, com as placas conectadas por USB. A configuração é relevante porque o tempo de resposta do modelo depende diretamente dela.
 
 Foram comparados dois modelos abertos de porte semelhante, distribuídos pelo Ollama com quantização de 4 bits (Q4\_K\_M): o Qwen2.5-Coder 7B, com 7,6 bilhões de parâmetros e treinado especificamente para código \cite{hui2024}, e o Llama 3.1 8B, com 8,0 bilhões de parâmetros e de uso geral \cite{grattafiori2024}. Os dois foram executados pelo mesmo servidor e acessados pela mesma configuração da plataforma, alterando-se apenas o nome do modelo; cada um ocupou cerca de 5~GB de memória e foi processado inteiramente na GPU. Antes da série de cada modelo, uma requisição de aquecimento, descartada, carregou o modelo em memória.
 
-O conjunto de avaliação reúne dez atividades práticas de complexidade crescente, apresentadas no \autoref{qua:activities}. As atividades foram escolhidas para cobrir os recursos mais usados em disciplinas introdutórias — saídas digitais, entradas analógicas, comunicação com periféricos e conectividade de rede — e são descritas à plataforma no mesmo nível de detalhe em que um roteiro de laboratório as apresentaria ao estudante.
+O conjunto de avaliação reúne dez atividades práticas de complexidade crescente, apresentadas no \autoref{qua:activities}, divididas igualmente entre as duas placas. As que dependem de recursos próprios do ESP32 ficaram com ele: a conexão WiFi, nas atividades A8 a A10, a geração de PWM, que no ESP32 usa funções próprias, alteradas entre versões do seu núcleo, na A2, e o barramento I2C em pinos configuráveis, na A6. As outras cinco foram executadas no Arduino Mega 2560. As atividades foram escolhidas para cobrir os recursos mais usados em disciplinas introdutórias — saídas digitais, entradas analógicas, comunicação com periféricos e conectividade de rede — e são descritas à plataforma no mesmo nível de detalhe em que um roteiro de laboratório as apresentaria ao estudante.
 
 \begin{quadro}[!htb]
   \centering
   \caption{Atividades práticas utilizadas na avaliação}
   \label{qua:activities}
-  \begin{tabularx}{\textwidth}{|c|X|c|}
+  \begin{tabularx}{\textwidth}{|c|X|c|c|}
     \hline
-    \textbf{Atividade} & \textbf{Descrição} & \textbf{Complexidade} \\
+    \textbf{Atividade} & \textbf{Descrição} & \textbf{Complexidade} & \textbf{Placa} \\
     \hline
-    A1 & Piscar o LED embutido em intervalo fixo & Baixa \\
+    A1 & Piscar o LED embutido em intervalo fixo & Baixa & Mega 2560 \\
     \hline
-    A2 & Variar a intensidade de um LED por PWM & Baixa \\
+    A2 & Variar a intensidade de um LED por PWM & Baixa & ESP32 \\
     \hline
-    A3 & Ler o estado de um botão e acionar um LED & Baixa \\
+    A3 & Ler o estado de um botão e acionar um LED & Baixa & Mega 2560 \\
     \hline
-    A4 & Emitir uma sequência de tons em um \textit{buzzer} & Média \\
+    A4 & Emitir uma sequência de tons em um \textit{buzzer} & Média & Mega 2560 \\
     \hline
-    A5 & Ler um sensor de temperatura e imprimir as leituras na porta serial & Média \\
+    A5 & Ler um sensor de temperatura e imprimir as leituras na porta serial & Média & Mega 2560 \\
     \hline
-    A6 & Exibir as leituras de um sensor em um \textit{display} I2C & Média \\
+    A6 & Exibir as leituras de um sensor em um \textit{display} I2C & Média & ESP32 \\
     \hline
-    A7 & Acionar LEDs distintos conforme faixas de leitura de um potenciômetro & Média \\
+    A7 & Acionar LEDs distintos conforme faixas de leitura de um potenciômetro & Média & Mega 2560 \\
     \hline
-    A8 & Conectar a placa a uma rede WiFi e registrar o endereço obtido & Alta \\
+    A8 & Conectar a placa a uma rede WiFi e registrar o endereço obtido & Alta & ESP32 \\
     \hline
-    A9 & Disponibilizar as leituras de um sensor em uma página servida pela placa & Alta \\
+    A9 & Disponibilizar as leituras de um sensor em uma página servida pela placa & Alta & ESP32 \\
     \hline
-    A10 & Acionar um atuador a partir de requisições HTTP recebidas pela placa & Alta \\
+    A10 & Acionar um atuador a partir de requisições HTTP recebidas pela placa & Alta & ESP32 \\
     \hline
   \end{tabularx}
   \fonte{elaborado pelo autor.}
 \end{quadro}
 
-Cada atividade foi submetida três vezes a cada modelo, em conversas independentes, para reduzir o efeito da variação entre gerações. Os pedidos, reproduzidos no \autoref{app:evaluation-prompts}, foram enviados pela API da plataforma, com as mesmas requisições que a interface faz, e o código de cada resposta foi salvo sem alterações como um projeto da IDE. Nas atividades que usam WiFi, o pedido indica as constantes que guardam o nome e a senha da rede, preenchidas apenas na hora da gravação, de modo que esses dados não passam pelo modelo. Na IDE ficaram instaladas apenas as bibliotecas previstas no perfil da placa. Cada código foi então compilado, gravado no ESP32 e observado em execução. Considerou-se funcional o código que compila sem erros e produz o comportamento descrito no enunciado da atividade. Quando o resultado não atendeu a esse critério, o erro foi informado à plataforma pela própria conversa, em até duas rodadas de refinamento, e o desfecho foi registrado separadamente.
+Cada atividade foi submetida três vezes a cada modelo, em conversas independentes, para reduzir o efeito da variação entre gerações. Os pedidos, reproduzidos no \autoref{app:evaluation-prompts}, foram enviados pela API da plataforma, com as mesmas requisições que a interface faz, e o código de cada resposta foi salvo sem alterações como um projeto da IDE. Nas atividades que usam WiFi, o pedido indica as constantes que guardam o nome e a senha da rede, preenchidas apenas na hora da gravação, de modo que esses dados não passam pelo modelo. Na IDE ficaram instaladas apenas as bibliotecas previstas no perfil da placa. Cada código foi então compilado, gravado na placa da atividade e observado em execução. Considerou-se funcional o código que compila sem erros e produz o comportamento descrito no enunciado da atividade. Quando o resultado não atendeu a esse critério, o erro foi informado à plataforma pela própria conversa, em até duas rodadas de refinamento, e o desfecho foi registrado separadamente.
 
 Duas métricas foram coletadas. A primeira é a taxa de códigos funcionais, calculada sobre o total de gerações e desmembrada em duas situações: código funcional na primeira geração e código funcional após refinamento. A segunda é o tempo de resposta, medido pela própria API entre o envio do \textit{prompt} ao modelo e o recebimento da resposta completa, e reportado como média e desvio padrão das repetições. A plataforma configura o Ollama para manter o modelo carregado em memória por 30 minutos após a última requisição; assim, apenas a primeira geração após um período de inatividade inclui o tempo de carregamento do modelo, que a API registra separadamente. A medição isola o tempo do modelo: não inclui a digitação da descrição pelo estudante nem a compilação e a gravação do código, que dependem da IDE e não da plataforma.
