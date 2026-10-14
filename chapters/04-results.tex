@@ -167,7 +167,7 @@ A \autoref{tab:functional-rate} apresenta, para cada atividade, a placa em que f
     A4    & Mega 2560 & 3 & 0 & -- & -- \\
     A5    & Mega 2560 & 3 & 0 & -- & -- \\
     A6    & ESP32     & -- & -- & -- & -- \\
-    A7    & Mega 2560 & -- & -- & -- & -- \\
+    A7    & Mega 2560 & 1 & -- & -- & -- \\
     A8    & ESP32     & -- & -- & -- & -- \\
     A9    & ESP32     & -- & -- & -- & -- \\
     A10   & ESP32     & -- & -- & -- & -- \\
@@ -180,7 +180,9 @@ A \autoref{tab:functional-rate} apresenta, para cada atividade, a placa em que f
 
 No Arduino Mega 2560, as 12 gerações do Qwen2.5-Coder nas atividades A1, A3, A4 e A5 funcionaram já na primeira resposta. Os códigos usaram os pinos que o perfil atribui a cada componente nessa placa, diferentes dos usados no ESP32, e a velocidade de 9600 baud que as observações do perfil indicam para o monitor serial. Em uma das gerações da A5, a primeira compilação falhou porque a biblioteca do DHT22 ainda não estava instalada na IDE, em desacordo com o procedimento da \autoref{sec:method-evaluation}. Ao receber a mensagem de erro, o modelo não gerou código novo e indicou a instalação da biblioteca; instalada a biblioteca, o código original funcionou. Por se tratar de falha na preparação do ambiente, e não no código gerado, essa geração foi contada como funcional na primeira resposta.
 
-\placeholder{Completar com a A7 do Qwen2.5-Coder no Mega, com o Llama 3.1 no Mega e com as duas séries no ESP32: taxa global de cada modelo; se a taxa cai com a complexidade das atividades; quais atividades concentraram as falhas; que tipo de erro apareceu; e quanto o refinamento recuperou}
+Na A7, apenas uma das três gerações do Qwen2.5-Coder funcionou na primeira resposta. As outras duas compilaram, mas não dividiram corretamente o curso do potenciômetro. Em uma delas, a faixa foi calculada com a função \texttt{map}, convertendo a leitura de 0 a 1023 para um valor de 0 a 2; como o cálculo é feito com números inteiros, o resultado só chega a 2 no valor máximo da leitura. Na prática, o LED verde acendia na primeira metade do curso, o amarelo na segunda e o vermelho apenas no fim exato, o que resultou em duas faixas em vez de três. Na outra, a faixa foi obtida dividindo a leitura por 333; para leituras de 999 a 1023, o resultado é 3, valor que o código não associa a nenhum LED, e os três se apagavam no fim do curso. Os dois erros estão no tratamento dos limites da escala de 10 bits e foram classificados como comportamento diferente do pedido.
+
+\placeholder{Completar com o refinamento das duas gerações da A7 que falharam, com o Llama 3.1 no Mega e com as duas séries no ESP32: taxa global de cada modelo; se a taxa cai com a complexidade das atividades; quais atividades concentraram as falhas; que tipo de erro apareceu; e quanto o refinamento recuperou}
 
 \subsection{Tempo de resposta}
 \label{subsec:results-time}
