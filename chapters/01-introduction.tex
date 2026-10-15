@@ -10,7 +10,7 @@ No trabalho da BitDogLab, essa barreira é enfrentada com um modelo de linguagem
 
 Diante desse cenário, este trabalho propõe o Duckoder, uma plataforma que oferece essa assistência de forma local. A solução é composta por três partes: uma interface \textit{web}, na qual o estudante escolhe a placa, descreve em linguagem natural o que deseja que ela faça e consulta como ligar os componentes usados pelo código; uma interface de programação de aplicações (API, do inglês \textit{Application Programming Interface}) no estilo REST (do inglês \textit{Representational State Transfer}), que armazena os perfis de \textit{hardware} das placas, insere automaticamente essa descrição em cada requisição e mantém o histórico das conversas; e um LLM aberto executado em um servidor da rede local, por meio do Ollama. Assim, a plataforma funciona sem acesso à internet, sem custos com serviços externos e sem que os dados saiam da instituição.
 
-O \textit{hardware} é tratado apenas como alvo de validação, sem detalhamento do projeto eletrônico. Para avaliar a plataforma, utiliza-se um conjunto de atividades práticas de complexidade crescente, cujos códigos são gerados pela plataforma, gravados na placa por meio de um ambiente de desenvolvimento integrado (IDE, do inglês \textit{Integrated Development Environment}) e executados, medindo-se a proporção de códigos que funcionam corretamente e o tempo de resposta do modelo no servidor local.
+O \textit{hardware} é tratado apenas como alvo de validação, sem detalhamento do projeto eletrônico. Para avaliar a plataforma, utiliza-se um conjunto de atividades práticas de complexidade crescente, cujos códigos são gerados pela plataforma e executados, medindo-se a proporção de códigos que funcionam corretamente e o tempo de resposta do modelo no servidor local. A gravação do código na placa permanece a cargo do estudante, que o copia para um ambiente de desenvolvimento integrado (IDE, do inglês \textit{Integrated Development Environment}), como faria com um código escrito por ele.
 
 \section{Objetivos}
 \label{sec:objectives}
@@ -29,7 +29,7 @@ Para alcançar o objetivo geral, foram definidos os seguintes objetivos específ
   \item definir os requisitos e a arquitetura da plataforma, incluindo o formato da descrição de \textit{hardware} utilizada como contexto pelo modelo;
   \item implementar uma API REST que integre um LLM aberto, executado em servidor na rede local, e insira automaticamente a descrição da placa nas requisições;
   \item construir uma interface \textit{web} em que o estudante descreva a atividade em linguagem natural e receba o código gerado com explicações;
-  \item avaliar a plataforma em um conjunto de atividades práticas executadas na placa, quanto à taxa de códigos funcionais e ao tempo de resposta.
+  \item avaliar a plataforma em um conjunto de atividades práticas, quanto à taxa de códigos funcionais e ao tempo de resposta.
 \end{alineas}
 
 \section{Organização do trabalho}
