@@ -162,17 +162,17 @@ A \autoref{tab:functional-rate} apresenta, para cada atividade, a placa em que f
     Atividade & Placa & 1.\textsuperscript{a} geração & Após refino & 1.\textsuperscript{a} geração & Após refino \\
     \midrule
     A1    & Mega 2560 & 3 & 0 & 3 & 0 \\
-    A2    & ESP32     & -- & -- & -- & -- \\
+    A2    & ESP32     & 3 & 0 & 3 & 0 \\
     A3    & Mega 2560 & 3 & 0 & 3 & 0 \\
     A4    & Mega 2560 & 3 & 0 & 3 & 0 \\
     A5    & Mega 2560 & 3 & 0 & 1 & 0 \\
-    A6    & ESP32     & -- & -- & -- & -- \\
+    A6    & ESP32     & 2 & 1 & 0 & 0 \\
     A7    & Mega 2560 & 1 & 0 & 3 & 0 \\
-    A8    & ESP32     & -- & -- & -- & -- \\
-    A9    & ESP32     & -- & -- & -- & -- \\
-    A10   & ESP32     & -- & -- & -- & -- \\
+    A8    & ESP32     & 3 & 0 & 2 & 1 \\
+    A9    & ESP32     & 1 & 0 & 2 & 1 \\
+    A10   & ESP32     & 3 & 0 & 0 & 1 \\
     \midrule
-    Total &           & -- & -- & -- & -- \\
+    Total &           & 25 & 1 & 20 & 3 \\
     \bottomrule
   \end{tabular}
   \fonte{elaborado pelo autor.}
@@ -190,7 +190,17 @@ As duas falhas do Llama 3.1 ocorreram na A5. Em duas gerações, o objeto do sen
 
 No Mega, portanto, cada modelo produziu 13 códigos funcionais em 15 gerações, nenhum deles obtido por refinamento. As falhas, porém, não coincidiram: o Qwen2.5-Coder errou no tratamento dos limites da escala do potenciômetro, que o Llama 3.1 resolveu nas três gerações, e o Llama 3.1 errou na inicialização do sensor, que o Qwen2.5-Coder fez corretamente em todas. Nos dois modelos, as respostas de correção tenderam a manter o erro original ou a introduzir erros novos, como métodos inexistentes na biblioteca, em vez de corrigir o defeito descrito.
 
-\placeholder{Completar após os testes na bancada das duas séries no ESP32: taxa global de cada modelo; se a taxa cai com a complexidade das atividades; quais atividades concentraram as falhas; que tipo de erro apareceu; e quanto o refinamento recuperou}
+No ESP32, as seis gerações da A2 funcionaram na primeira resposta nos dois modelos, todas com a função \texttt{analogWrite}, que as observações do perfil indicam no lugar das funções de PWM que deixaram de existir nas versões recentes do núcleo da placa. Na A8, as três gerações do Qwen2.5-Coder funcionaram na primeira resposta. Em uma delas, o monitor serial exibiu caracteres ilegíveis por estar configurado com velocidade diferente dos 115200 baud usados pelo código; ajustado o monitor, o endereço IP apareceu, e, como na A5, a geração foi contada como funcional na primeira resposta. No Llama 3.1, duas gerações da A8 funcionaram na primeira resposta, e a terceira omitiu a inclusão da biblioteca \texttt{WiFi.h}, erro de compilação corrigido na primeira rodada de refinamento.
+
+Na A6, duas gerações do Qwen2.5-Coder funcionaram na primeira resposta, e a terceira não compilou por usar o comando \texttt{continue} fora de um laço, na função \texttt{loop}; a primeira rodada substituiu o comando por uma estrutura condicional, e o código passou a funcionar. As três gerações do Llama 3.1 falharam pelo mesmo motivo: o objeto do \textit{display} foi criado passando os pinos SDA e SCL, 21 e 22, que o perfil indica para a função \texttt{Wire.begin}, nos parâmetros que definem a largura e a altura da tela. O código compilou, mas a biblioteca passou a tratar o \textit{display} como uma tela de 21 por 22 pixels, e apenas um fragmento do texto aparecia no canto superior. Nas duas rodadas de cada geração, o modelo alterou a posição do cursor, o tamanho da letra e a conversão dos valores, mas não o construtor do \textit{display}, e nenhuma das três foi recuperada.
+
+Na A9, o Qwen2.5-Coder produziu código funcional em apenas uma das três gerações, a que usou a biblioteca \texttt{WebServer}, do próprio núcleo da placa. As outras duas recorreram à biblioteca \texttt{ESPAsyncWebServer}, que não faz parte do perfil, e não compilaram. Em uma delas, o código chamava a função \texttt{handleClient}, que pertence à biblioteca \texttt{WebServer}; a primeira rodada manteve a função, atribuindo o erro à versão da biblioteca, e a segunda a trocou por uma função \texttt{run}, também inexistente. Na outra, as constantes com o nome e a senha da rede foram declaradas como números inteiros; a primeira rodada corrigiu as constantes, mas passou a usar um pino sem declará-lo, e a segunda manteve a dependência da biblioteca externa, sem chegar a um código que compilasse. No Llama 3.1, duas gerações da A9 funcionaram na primeira resposta, e a terceira, que usava o objeto do servidor sem declará-lo, foi corrigida na primeira rodada.
+
+Na A10, as três gerações do Qwen2.5-Coder funcionaram na primeira resposta, todas com a biblioteca \texttt{WebServer}; uma delas, porém, não inicializava a porta serial nem mostrava o endereço da placa, que o estudante precisa conhecer para acessar os endereços de controle. As três gerações do Llama 3.1 não compilaram pelo mesmo motivo: em vez de criar um servidor, o código tentava ler as requisições por uma função \texttt{client} do objeto \texttt{WiFi}, que não existe. Apenas uma foi recuperada, na segunda rodada. Nas outras duas, as respostas seguintes recorreram a outras funções inexistentes do mesmo objeto, a uma biblioteca do ESP8266, placa diferente da selecionada, e a uma biblioteca que não existe; em uma delas, o código correto só veio na terceira rodada, fora do limite, e a geração foi contada como falha.
+
+Somadas as duas placas, o Qwen2.5-Coder produziu código funcional na primeira resposta em 25 das 30 gerações (83\%) e chegou a 26 (87\%) com o refinamento; o Llama 3.1, em 20 (67\%) e 23 (77\%), respectivamente. O modelo treinado para código teve, portanto, o melhor desempenho, sobretudo na primeira resposta. A taxa caiu com a complexidade das atividades, mas de forma diferente nos dois modelos. Nas atividades de complexidade baixa, as 18 gerações funcionaram na primeira resposta. Nas de complexidade média, o Qwen2.5-Coder acertou 9 das 12 na primeira resposta, e o Llama 3.1, 7; nas de complexidade alta, 7 e 4 das 9, respectivamente, embora o refinamento tenha levado o Llama 3.1 ao mesmo total de 7. As falhas concentraram-se em poucas atividades e tenderam a se repetir nas três gerações do mesmo modelo, como no construtor do \textit{display} na A6 e na leitura das requisições na A10, no Llama 3.1, o que indica lacunas do modelo sobre bibliotecas específicas, e não variação aleatória entre gerações.
+
+Das 15 gerações que falharam na primeira resposta, 8 não compilaram e 7 compilaram, mas não produziram o comportamento pedido. O refinamento recuperou 4 delas, todas com erro de compilação, e nenhuma das 7 com comportamento diferente. A diferença está na informação que chega ao modelo: a mensagem do compilador aponta a linha e a causa do erro, enquanto o comportamento observado precisa ser descrito pelo estudante, e, nesses casos, as respostas de correção tenderam a alterar partes do código sem relação com o defeito. Mesmo entre os erros de compilação, metade não foi recuperada, em geral porque o modelo substituiu uma função inexistente por outra, também inexistente.
 
 \subsection{Tempo de resposta}
 \label{subsec:results-time}
@@ -231,7 +241,7 @@ A requisição de aquecimento que antecedeu a série de cada modelo deixou o mod
 \subsection{Discussão}
 \label{subsec:results-discussion}
 
-Os resultados permitem responder à pergunta central deste trabalho: se um modelo aberto executado na infraestrutura da instituição é suficiente para a tarefa que \citeonline{fruett2024} resolvem com um serviço comercial em nuvem. A estratégia de contexto é a mesma nos dois casos — a descrição do \textit{hardware} precede o pedido do estudante —, e a diferença está no modelo e em onde ele executa. \placeholder{Posicionar a taxa de códigos funcionais obtida frente ao que o trabalho da BitDogLab relata, indicando se a execução local implica perda de qualidade e de que ordem}
+Os resultados permitem responder à pergunta central deste trabalho: se um modelo aberto executado na infraestrutura da instituição é suficiente para a tarefa que \citeonline{fruett2024} resolvem com um serviço comercial em nuvem. A estratégia de contexto é a mesma nos dois casos — a descrição do \textit{hardware} precede o pedido do estudante —, e a diferença está no modelo e em onde ele executa. \citeonline{fruett2024} não medem a taxa de códigos funcionais: a avaliação da BitDogLab é feita pela percepção dos participantes de uma oficina, dos quais 64\% destacaram a facilidade de programar com o auxílio da IA. Não há, portanto, um número a comparar diretamente, e este trabalho não mediu um modelo comercial nas mesmas atividades. Os resultados indicam, ainda assim, que um modelo local atende às atividades de complexidade baixa e média com poucas falhas, com o Qwen2.5-Coder em 83\% de códigos funcionais na primeira resposta, e que as perdas se concentram em bibliotecas específicas, como a do \textit{display} e as de servidor \textit{web}, ponto em que modelos maiores, executados em servidores com mais memória, podem ser avaliados em trabalhos futuros. O ciclo de correção também é o mesmo nos dois trabalhos — o estudante devolve ao modelo o erro observado —, e os resultados mostram onde ele funciona: com as mensagens do compilador, mais do que com a descrição de um comportamento.
 
 Frente aos demais trabalhos comparados no \autoref{qua:related-work}, a contribuição é de outra natureza. \citeonline{duarte2024} e \citeonline{souza2014} reduzem o custo do recurso didático, e \citeonline{parreira2021} remove a necessidade do dispositivo físico; nenhum deles atua sobre a etapa de escrita do código, que é justamente onde a plataforma proposta intervém. Os dois conjuntos de resultados são, portanto, complementares: a plataforma pode ser aplicada sobre qualquer um desses recursos didáticos, desde que exista um perfil de \textit{hardware} correspondente.
 
