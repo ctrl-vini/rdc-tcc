@@ -84,28 +84,29 @@ ones that depend on its own features (WiFi, its PWM API and I2C on configurable 
 
 Each activity was sent three times to each of two open models of similar size, both 4-bit
 quantized and served by the same Ollama instance: **Qwen2.5-Coder 7B**, trained for code, and
-**Llama 3.1 8B**, general purpose. That makes 60 generations. Every program was compiled, flashed
-to the board and observed running; when it failed, the error went back through the same
-conversation, in up to two refinement rounds. The server was a Mac mini with an Apple M4 and 16 GB
+**Llama 3.1 8B**, general purpose. That makes 60 generations. Every program was compiled and run, and its behavior was checked
+against the activity; when it failed, the error went back through the same conversation, in up
+to two refinement rounds. The server was a Mac mini with an Apple M4 and 16 GB
 of memory.
 
-Results so far:
+Results:
 
+- **Working code:** Qwen2.5-Coder produced working code in the first answer in 25 of 30
+  generations (83%) and in 26 (87%) after refinement; Llama 3.1 in 20 (67%) and 23 (77%). Every
+  generation for the low-complexity activities worked in the first answer, and the failures
+  concentrated on specific libraries, such as the OLED display and the web servers. Refinement
+  recovered 4 of the 8 compilation errors and none of the 7 programs that compiled but behaved
+  differently from what was asked.
 - **Response time:** 13.9 s on average for Qwen2.5-Coder (3.4 to 27.8 s, about 21 tokens/s) and
   12.3 s for Llama 3.1 (5.6 to 26.5 s, about 19.5 tokens/s). Time grows almost linearly with the
   length of the code.
 - **Network:** the exchange between browser, API and model added 4 to 10 ms to each request, and no
   reply was larger than 4.4 kB, against seconds of inference.
-- **Working code on the Mega 2560:** 13 of 15 programs worked on the first answer for each model,
-  and refinement recovered none of the failures. The models failed in different places:
-  Qwen2.5-Coder on the edges of the potentiometer's scale (A7) and Llama 3.1 on initializing the
-  temperature sensor (A5).
 
 ## Status
 
-- Chapters 1 to 3 are written.
-- Chapter 4 is written except for the ESP32 bench results, which are being collected.
-- The conclusion and the abstracts will be finished with the final results.
+The text is complete. Still to be filled in before the defense: the names of the other two
+members of the examination board and the catalog card, generated with the IFCE library tool.
 
 ## Repository structure
 
