@@ -1,12 +1,25 @@
-% Conclusion. Use "Considerações finais" as the title if the results are not
-% conclusive, as the template recommends.
+% Conclusion: problem and objectives revisited, main results, contribution,
+% limitations and future work.
 
 \chapter{Conclusão}
 \label{chap:conclusion}
 
-\placeholder{Retomar o problema e os objetivos, sintetizar os resultados e destacar as contribuições do trabalho.}
+Este trabalho partiu de uma barreira comum nas disciplinas práticas: mesmo com placas didáticas acessíveis, programá-las ainda é difícil para estudantes iniciantes. A solução de \citeonline{fruett2024} enfrenta essa barreira com um LLM comercial em nuvem, o que traz dependência de acesso à internet, custo por uso, envio das interações a terceiros e o carregamento manual da descrição do \textit{hardware}. Para oferecer essa assistência sem essas restrições, foi desenvolvido o Duckoder, uma plataforma \textit{web} integrada a um LLM aberto executado em um servidor da rede local, o que atende ao objetivo geral definido na \autoref{sec:objectives}.
 
-% Future work suggestions kept out of the current scope: uploading the code to
-% the board through the platform, real-time data visualization and an
-% evaluation with groups of students.
-\placeholder{Indicar as limitações e as sugestões de trabalhos futuros.}
+Os quatro objetivos específicos foram cumpridos. Os requisitos e a arquitetura separaram a plataforma em interface \textit{web}, API REST e modelo de linguagem, e a descrição de cada placa foi definida como um perfil em JSON, com os componentes, os pinos e as observações de uso. A API, implementada com o FastAPI, guarda esses perfis, monta o \textit{prompt} a cada requisição, mantém o histórico das conversas e acessa o modelo por meio do Ollama, de modo que o estudante nunca manipula a descrição do \textit{hardware}. A interface permite escolher a placa, descrever a atividade em linguagem natural, refinar o código na mesma conversa e consultar como ligar os componentes usados por cada versão do código. A verificação dos requisitos confirmou o funcionamento integralmente local, sem chamadas a serviços externos, e a inclusão de novas placas apenas com novos arquivos de perfil. Por fim, a plataforma foi avaliada em dez atividades práticas, divididas entre o ESP32 e o Arduino Mega 2560, com dois modelos abertos de porte semelhante.
+
+Os resultados indicam que um modelo local é suficiente para as atividades típicas de disciplinas introdutórias. O Qwen2.5-Coder 7B, treinado para código, produziu código funcional na primeira resposta em 83\% das gerações e em 87\% após o refinamento; o Llama 3.1 8B, de uso geral, em 67\% e 77\%, respectivamente. Todas as gerações das atividades de complexidade baixa funcionaram na primeira resposta, e as falhas concentraram-se em poucas atividades, ligadas a bibliotecas específicas, como a do \textit{display} e as de servidor \textit{web}. O refinamento pela própria conversa mostrou-se eficaz para erros de compilação, cuja mensagem aponta a causa ao modelo, mas não recuperou nenhum caso em que o código compilava e se comportava de forma diferente da pedida. O tempo médio de resposta ficou entre 12 e 14~s, com respostas entre 3 e 28~s, e a comunicação entre navegador, API e modelo acrescentou apenas milissegundos, sem nenhuma falha durante a avaliação.
+
+A principal contribuição do trabalho é mostrar que a estratégia de contexto adotada por \citeonline{fruett2024} — apresentar o \textit{hardware} ao modelo antes do pedido do estudante — pode ser automatizada e executada inteiramente na infraestrutura da instituição, com um modelo aberto e um computador de mesa com 16~GB de memória. Troca-se o acesso a modelos maiores pela independência de conexão externa, pela ausência de custo por requisição e pela permanência dos dados na instituição. Do ponto de vista de redes, a plataforma exemplifica um serviço de inteligência artificial oferecido na rede local, em que o tráfego entre os estudantes e o servidor é pequeno diante do tempo de processamento do modelo.
+
+Esses resultados devem ser lidos com as limitações discutidas na \autoref{subsec:results-discussion}: a amostra de dez atividades com três gerações cada, a execução de cada atividade em uma única placa, a avaliação do comportamento feita pelo autor, e não por estudantes, e a dependência dos tempos em relação ao servidor utilizado. A plataforma também não verifica conflitos de pinos quando o modelo escolhe um pino já atribuído a outro componente, como mostrado na \autoref{sec:results-web}.
+
+Como trabalhos futuros, sugerem-se:
+
+\begin{alineas}
+  \item integrar à plataforma a compilação e a gravação do código, com o reconhecimento da placa conectada por USB e sua seleção automática, de modo que as mensagens do compilador sejam devolvidas ao modelo sem intervenção do estudante, já que foram esses os erros que o refinamento conseguiu corrigir;
+  \item permitir a simulação do código e do circuito antes da gravação, para que o estudante compare o comportamento obtido com o esperado e descreva com mais precisão os erros de lógica, que o refinamento não recuperou nesta avaliação;
+  \item ampliar os perfis de \textit{hardware}, com novos componentes, a criação de componentes personalizados pelo professor e a edição das ligações sugeridas pela plataforma, incluindo a verificação de conflitos de pinos;
+  \item avaliar modelos locais maiores ou especializados e compará-los, nas mesmas atividades, com serviços comerciais acessados por API, para medir quanto a execução local custa em qualidade dos códigos;
+  \item avaliar a plataforma com turmas de estudantes, medindo a clareza das explicações geradas e o efeito sobre a aprendizagem.
+\end{alineas}
