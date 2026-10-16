@@ -129,6 +129,7 @@ figures/              interface screenshots
 references.bib        bibliography (BibTeX, abntex2cite)
 tcc.pdf               compiled thesis, a copy of build/main.pdf
 assets/               cover image shown in this README
+CITATION.cff          citation metadata behind GitHub's "Cite this repository" button
 tex-fmt.toml          formatter settings used by LaTeX Workshop
 ```
 

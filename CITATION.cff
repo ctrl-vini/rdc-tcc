@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you cite this work, please use the reference below."
+title: "Plataforma web com LLM local para apoio à programação de sistemas embarcados didáticos"
+authors:
+  - given-names: "José Vinícius Alves"
+    family-names: "Oliveira"
+repository-code: "https://github.com/ctrl-vini/rdc-tcc"
+keywords:
+  - embedded systems
+  - large language models
+  - web application
+  - local network
+  - education
+preferred-citation:
+  type: thesis
+  title: "Plataforma web com LLM local para apoio à programação de sistemas embarcados didáticos"
+  authors:
+    - given-names: "José Vinícius Alves"
+      family-names: "Oliveira"
+  thesis-type: "Undergraduate thesis (Tecnologia em Redes de Computadores)"
+  institution:
+    name: "Instituto Federal de Educação, Ciência e Tecnologia do Ceará"
+    city: "Jaguaribe"
+    country: "BR"
+  year: 2026
+  languages:
+    - pt
+  url: "https://github.com/ctrl-vini/rdc-tcc/blob/main/tcc.pdf"
