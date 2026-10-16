@@ -13,6 +13,14 @@ The thesis is written in Portuguese, in LaTeX with [abnTeX2](https://www.abntex.
 the IFCE academic work template. The platform it describes is in
 [ctrl-vini/duckoder](https://github.com/ctrl-vini/duckoder).
 
+## Read the thesis
+
+<p align="center">
+  <a href="tcc.pdf"><img src="assets/tcc-cover.png" alt="Cover of the thesis" width="300"></a>
+</p>
+
+<p align="center"><a href="tcc.pdf"><b>Open the full thesis (PDF, in Portuguese)</b></a></p>
+
 ## The work
 
 Language models can help students program teaching boards such as the ESP32 or the Arduino Mega
@@ -119,6 +127,8 @@ chapters/             01 introduction, 02 theoretical background, 03 methodology
 postextual/           appendices: board profiles sent to the model and evaluation prompts
 figures/              interface screenshots
 references.bib        bibliography (BibTeX, abntex2cite)
+tcc.pdf               compiled thesis, a copy of build/main.pdf
+assets/               cover image shown in this README
 tex-fmt.toml          formatter settings used by LaTeX Workshop
 ```
 
@@ -132,5 +142,6 @@ both. On Debian or Ubuntu, a minimal TeX Live also needs `texlive-publishers`,
 latexmk -pdf -outdir=build main.tex
 ```
 
-The PDF is written to `build/main.pdf`. In VS Code, LaTeX Workshop uses the same recipe and output
+The PDF is written to `build/main.pdf`; `tcc.pdf`, at the root, is a copy of it, updated by
+hand after each revision. In VS Code, LaTeX Workshop uses the same recipe and output
 folder. The document also compiles on Overleaf with pdfLaTeX.
